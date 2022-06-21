@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="4dp"
-        android:text="@string/fiskinfo_header"
+        android:text="@string/til_havs_header"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView

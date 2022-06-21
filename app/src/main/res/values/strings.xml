@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">FiskInfo</string>
+    <string name="app_name" translatable="false">Til Havs</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
@@ -118,7 +118,7 @@
     <string name="echogram_snap_title_or_other_main_aspect" translatable="false">Snap title or other main aspect</string>
     <string name="echogram_date_and_time_or_other_first_detail" translatable="false">Date and time or other first detail</string>
     <string name="echogram_position_or_other_second_detail" translatable="false">Position or other second detail</string>
-    <string name="fiskinfo_header">Fiskinfo</string>
+    <string name="til_havs_header">Til Havs</string>
     <string name="one_stop_shop_header">One-stop-shop</string>
     <string name="snap_from">From</string>
     <string name="snap_to">To</string>
@@ -149,13 +149,13 @@
     <string name="fragment_title_tools">Tools</string>
     <string name="fragment_title_map">Map</string>
     <string name="fragment_title_tool_details">Tool Details</string>
-    <string name="fragment_title_overview">FiskInfo Overview</string>
+    <string name="fragment_title_overview">Til Havs Overview</string>
     <string name="fragment_title_snapfish">SnapFish</string>
     <string name="fragment_title_user_profile">User Profile</string>
     <string name="fragment_title_user_preferences">Preferences</string>
     <string name="fragment_title_snap_editor">New Snap Message</string>
     <string name="fragment_title_snap_detail">Snap Message</string>
-    <string name="fragment_title_login">FiskInfo Login</string>
+    <string name="fragment_title_login">Til Havs Login</string>
     <string name="fragment_title_analysis">Catch Analysis</string>
     <string name="fragment_title_echogram_viewer">Echogram Viewer</string>
     <string name="fragment_title_deployment_editor">Report Tool</string>
@@ -197,7 +197,7 @@
         <![CDATA[
         <h2>Samtykke for behandling av personopplysninger</h2>
         <p>
-            Tjenestene som FiskInfo-appen tilbyr er avhengig av noe informasjon som regnes som personopplysninger for å fungere.
+            Tjenestene som Til Havs-appen tilbyr er avhengig av noe informasjon som regnes som personopplysninger for å fungere.
             <b>Vi trenger derfor ditt samtykke</b> til hvordan appen samler inn og benytter disse opplysningene.
         </p>
 
@@ -235,11 +235,11 @@
 
         <h3>Hvordan deler vi informasjon vi har samlet inn?</h3>
         <p>
-        FiskInfo appen deler ikke informasjon direkte, men når du velger å sende en inn rapport for redskap genereres det en redskapsrapport som åpnes i din epost-app og innhold med vedlegg blir gjort klar for innsending til Kystvaktsentralen. Selve innsendingen gjør du som et eget steg fra epost-appen.
+        Til Havs appen deler ikke informasjon direkte, men når du velger å sende en inn rapport for redskap genereres det en redskapsrapport som åpnes i din epost-app og innhold med vedlegg blir gjort klar for innsending til Kystvaktsentralen. Selve innsendingen gjør du som et eget steg fra epost-appen.
         </p>
         <h3>Hvordan lager og sikrer vi informasjonen som samles inn?</h3>
         <p>
-        Informasjonen som lagres lokalt på mobiltelefonen lagres slik at den bare er tilgjengelig for FiskInfo appen.
+        Informasjonen som lagres lokalt på mobiltelefonen lagres slik at den bare er tilgjengelig for Til Havs appen.
         Kommunikasjonen med Barentswatch er sikret og krever innlogging med brukernavn og passord.
         </p>
 
@@ -251,7 +251,7 @@
         </p>
         ]]>
     </string>
-    <string name="login_welcome_heading">Welcome to the FiskInfo app!</string>
+    <string name="login_welcome_heading">Welcome to the Til Havs app!</string>
     <string name="login_welcome_text">This app allows you to view a map of fishing facilities, and to report your own facilities.\nTo use this app, you first have to consent to the terms of use and log in.</string>
     <string name="login_consent_step_text">Please press the button below to proceed to the terms of use and consent.</string>
     <string name="login_login_step_text">Please press the button below to proceed to the login. Links to information about how to register a user will be shown in the login dialog.</string>

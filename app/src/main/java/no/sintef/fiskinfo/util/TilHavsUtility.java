@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 //TEMP import static fiskinfoo.no.sintef.fiskinfoo.MainActivity.MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE;
 
-public class FiskInfoUtility {
+public class TilHavsUtility {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     // copy from InputStream

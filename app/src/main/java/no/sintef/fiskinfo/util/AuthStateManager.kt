@@ -74,7 +74,8 @@ class AuthStateManager private constructor(context: Context) {
     ): AuthState {
         val current = current
         current.update(response, ex)
-        return replace(current)
+        val retval = replace(current)
+        return retval
     }
 
     @AnyThread

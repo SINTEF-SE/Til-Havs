@@ -17,6 +17,8 @@
  */
 package no.sintef.fiskinfo.api
 
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.gson.*
 import java9.util.concurrent.CompletableFuture
 import net.openid.appauth.AuthState
@@ -60,6 +62,11 @@ fun <S> createService(serviceClass: Class<S>, baseUrl : String, authToken : Stri
 fun <S> createService(serviceClass: Class<S>, baseUrl : String, authService: AuthorizationService, authState: AuthState) : S {
     val in2 = HttpLoggingInterceptor()
     in2.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+    if(authState.accessToken == null) {
+
+    }
+
     val client =  OkHttpClient.Builder()
         //.authenticator(OIDCAuthenticator(authService, authState, "FiskInfo/3.0 (Android)"))
         //.addInterceptor(OAuthInterceptor("Bearer", authToken,  "FiskInfo/2.0 (Android)"))

@@ -17,13 +17,13 @@ android {
             storePassword prod_store_password
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "fiskinfoo.no.sintef.fiskinfoo"
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 44
-        versionName "3.0.1.2"
+        targetSdkVersion 31
+        versionCode 47
+        versionName "3.0.1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 appAuthRedirectScheme: "no.sintef.fiskinfo.android"
@@ -48,6 +48,22 @@ android {
         release {
             minifyEnabled false
             debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+//          The following two values don't seem to work if fetched from properties file.
+            buildConfigField("String", "SERVER_URL", "\"https://www.barentswatch.no/\"")
+            buildConfigField("String", "SERVER_ID_URL", "\"https://id.barentswatch.no/\"")
+//            buildConfigField("String", "SERVER_URL", prod_fiskinfo_server_url)
+//            buildConfigField("String", "SERVER_ID_URL", prod_fiskinfo_server_url)
+            buildConfigField("String", "FISKINFO_BW_CLIENT_ID", prod_fiskinfo_bwclientid)
+            buildConfigField("String", "FISKINFO_BW_CLIENT_SECRET", prod_fiskinfo_bwclientsecret)
+            buildConfigField("String", "FISKINFO_BW_CLIENT_REDIRECT_URL", prod_fiskinfo_bwclient_redirect_url)
+            buildConfigField("String", "FISKINFO_BW_CLIENT_SCOPE", prod_fiskinfo_bwclient_scope)
+            signingConfig signingConfigs.signing_config
+        }
+        DebugabbleRelease {
+            minifyEnabled false
+            debuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
 //          The following two values don't seem to work if fetched from properties file.
@@ -101,7 +117,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
-    implementation 'com.blundell:app-auth-android:0.7.1-HYBRID-FORK-0.0.2'
+    implementation 'net.openid:appauth:0.11.1'
     implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.2'
 
 //    implementation 'android.arch.navigation:navigation-fragment:1.0.0'

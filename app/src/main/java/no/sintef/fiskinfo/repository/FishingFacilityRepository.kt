@@ -20,6 +20,8 @@ package no.sintef.fiskinfo.repository
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.logEvent
 import net.openid.appauth.AuthorizationService
 import no.sintef.fiskinfo.BuildConfig
 import no.sintef.fiskinfo.api.FishingFacilityReportService
@@ -42,6 +44,8 @@ class FishingFacilityRepository(context: Context) {
 
     internal val authStateManager = AuthStateManager.getInstance(context)
     internal val authService = AuthorizationService(context)
+
+    private var mFirebaseAnalytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
 //    val bwServerUrl = "https://www.barentswatch.no/";
     val bwServerUrl = BuildConfig.SERVER_URL;
@@ -134,6 +138,24 @@ class FishingFacilityRepository(context: Context) {
 
 
     fun initService() {
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
+            param(FirebaseAnalytics.Param.VALUE, "Init Service")
+            param(FirebaseAnalytics.Param.CONTENT, "Auth state authorized: ${authStateManager.current.isAuthorized}")
+            param(FirebaseAnalytics.Param.CONTENT, "access token: ${if(authStateManager.current.accessToken == null) "Null" else "Not null"}")
+            param(FirebaseAnalytics.Param.CONTENT, "refresh token: ${if(authStateManager.current.refreshToken == null) "Null" else "Not null"}")
+        }
+
+        if(authStateManager.current.accessToken == null) {
+            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
+                param(FirebaseAnalytics.Param.VALUE, "Init Service")
+                param(FirebaseAnalytics.Param.CONTENT, "Access token is null")
+            }
+        }
+
+
+        if(authStateManager.current.accessToken == null) {
+        }
+
         fishingFacilityService =
             createService(FishingFacilityReportService::class.java,bwServerUrl , authService, authStateManager.current)
     }

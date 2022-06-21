@@ -38,6 +38,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.logEvent
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.databinding.ToolDeploymentEditorFragmentBinding
 import no.sintef.fiskinfo.model.fishingfacility.ToolTypeCode
@@ -65,11 +67,16 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
     private lateinit var mEditTextToolCountInput: TextInputEditText
     private lateinit var locAdapter: LocationRecyclerViewAdapter
 
+    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
+
         setHasOptionsMenu(true)
         _mBinding = DataBindingUtil.inflate(
             inflater,
@@ -160,16 +167,29 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.send_tool_report_action) {
 
+
             if (mViewModel.canSendReport()) {
                 var result = mViewModel.sendReport();
                 result.observe(this, Observer {
                     if (it.success) {
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                            param(FirebaseAnalytics.Param.CONTENT_TYPE, "Send tool report, success")
+                            param(FirebaseAnalytics.Param.SCREEN_NAME, "Tool Deployment")
+                            param(FirebaseAnalytics.Param.SCREEN_CLASS, "DeploymentEditorFragment")
+                        }
+
                         val text = getString(R.string.tool_deployment_sent)
                         val toast = Toast.makeText(this.requireActivity(), text, Toast.LENGTH_SHORT)
                         toast.show()
                         mViewModel.clear()
                         Navigation.findNavController(this.requireView()).navigateUp()
                     } else {
+                        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                            param(FirebaseAnalytics.Param.CONTENT_TYPE, "Send tool report, error")
+                            param(FirebaseAnalytics.Param.SCREEN_NAME, "Tool Deployment")
+                            param(FirebaseAnalytics.Param.SCREEN_CLASS, "DeploymentEditorFragment")
+                        }
+
                         Snackbar.make(
                             requireView(),
                             getString(R.string.tool_deployment_error) + it.errorMsg,
@@ -179,6 +199,12 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
                     }
                 })
             } else {
+                mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "Send tool report, invalid profile")
+                    param(FirebaseAnalytics.Param.SCREEN_NAME, "Tool Deployment")
+                    param(FirebaseAnalytics.Param.SCREEN_CLASS, "DeploymentEditorFragment")
+                }
+
                 Snackbar.make(
                     requireView(),
                     getString(R.string.tool_report_not_complete),

@@ -90,6 +90,12 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
             fab.setOnClickListener { view ->
 
                 if (!isUserProfileValid()) {
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                        param(FirebaseAnalytics.Param.CONTENT_TYPE, "Create new tool, invalid profile")
+                        param(FirebaseAnalytics.Param.SCREEN_NAME, "Tool List")
+                        param(FirebaseAnalytics.Param.SCREEN_CLASS, "ToolListFragment")
+                    }
+
                     Snackbar.make(
                         view,
                         getString(R.string.tool_list_profile_warning),
@@ -98,6 +104,11 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
                         .setAction("Action", null)
                         .show()
                 } else {
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
+                        param(FirebaseAnalytics.Param.CONTENT_TYPE, "Create new tool")
+                        param(FirebaseAnalytics.Param.SCREEN_NAME, "Tool List")
+                        param(FirebaseAnalytics.Param.SCREEN_CLASS, "ToolListFragment")
+                    }
 
                     var depViewModel = ViewModelProviders.of(requireActivity()).get(
                         DeploymentViewModel::class.java
