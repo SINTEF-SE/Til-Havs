@@ -31,12 +31,11 @@ class LocationDdmViewModel : LocationViewModel() {
     var ddmLocation = MutableLiveData<DDMLocation>();
 
     override fun setNewLocation(location : Location) {
-        if (location != null)
-            ddmLocation.value = DDMLocation.fromLocation(location)
+        ddmLocation.value = DDMLocation.fromLocation(location)
     }
 
-    fun validateLocation():Boolean {
-        return (ddmLocation != null)
+    private fun validateLocation():Boolean {
+        return (true)
     }
 
     override fun getLocation():Location? {

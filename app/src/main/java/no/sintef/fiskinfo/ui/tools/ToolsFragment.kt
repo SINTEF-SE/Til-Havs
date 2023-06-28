@@ -29,6 +29,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.ToolsFragmentBinding
 
 class ToolsFragment : Fragment() {
 
@@ -37,15 +38,26 @@ class ToolsFragment : Fragment() {
     }
 
     private lateinit var viewModel: ToolsViewModel
-    internal lateinit var viewPager: ViewPager
-    internal lateinit var pageAdapter: ToolPageAdapter
+    private lateinit var viewPager: ViewPager
+    private lateinit var pageAdapter: ToolPageAdapter
 
+    private var _binding: ToolsFragmentBinding? = null
+    // This property is only valid between onCreateView and
+// onDestroyView.
+    private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.tools_fragment, container, false)
+    ): View {
+        _binding = ToolsFragmentBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     /*

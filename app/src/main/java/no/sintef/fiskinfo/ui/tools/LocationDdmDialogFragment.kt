@@ -23,12 +23,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.location_ddm_editor_fragment.view.*
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.databinding.LocationDdmEditorFragmentBinding
 import no.sintef.fiskinfo.util.GpsLocationTracker
@@ -38,8 +35,9 @@ import no.sintef.fiskinfo.utilities.ui.IntRangeValidator
 class LocationDdmDialogFragment : DialogFragment() {
 
     private lateinit var viewModel: LocationDdmViewModel
-    private lateinit var mBinding: LocationDdmEditorFragmentBinding
-
+    private var _mBinding: LocationDdmEditorFragmentBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val mBinding get() = _mBinding!!
 
     interface LocationDdmDialogListener {
         fun onDdmEditConfirmed()
@@ -47,50 +45,45 @@ class LocationDdmDialogFragment : DialogFragment() {
 
     fun createView(
         inflater: LayoutInflater, container: ViewGroup?
-    ): View? {
-        mBinding = DataBindingUtil.inflate<LocationDdmEditorFragmentBinding>(
-            inflater,
-            no.sintef.fiskinfo.R.layout.location_ddm_editor_fragment,
-            container,
-            false
-        )
+    ): View {
+        _mBinding = LocationDdmEditorFragmentBinding.inflate(inflater, container, false)
 
         val root = mBinding.root
 
-        root.latitude_degrees_edit_text.addTextChangedListener(
-            IntRangeValidator(root.latitude_degrees_edit_text,
+        mBinding.latitudeDegreesEditText.addTextChangedListener(
+            IntRangeValidator(mBinding.latitudeDegreesEditText,
                 0,
                 true,
                 90,
-                true,
-                { viewModel.ddmLocation.value!!.latitudeDegrees = it.toInt() })
+                true
+            ) { viewModel.ddmLocation.value!!.latitudeDegrees = it.toInt() }
         )
 
-        root.latitude_minutes_edit_text.addTextChangedListener(
-            IntRangeValidator(root.latitude_minutes_edit_text,
+        mBinding.latitudeMinutesEditText.addTextChangedListener(
+            IntRangeValidator(mBinding.latitudeMinutesEditText,
                 0,
                 true,
                 59,
-                true,
-                { viewModel.ddmLocation.value!!.latitudeDecimalMinutes = it.toDouble() })
+                true
+            ) { viewModel.ddmLocation.value!!.latitudeDecimalMinutes = it }
         )
 
-        root.longitude_degrees_edit_text.addTextChangedListener(
-            IntRangeValidator(root.longitude_degrees_edit_text,
+        mBinding.longitudeDegreesEditText.addTextChangedListener(
+            IntRangeValidator(mBinding.longitudeDegreesEditText,
                 0,
                 true,
                 180,
-                true,
-                { viewModel.ddmLocation.value!!.longitudeDegrees = it.toInt() })
+                true
+            ) { viewModel.ddmLocation.value!!.longitudeDegrees = it.toInt() }
         )
 
-        root.longitude_minutes_edit_text.addTextChangedListener(
-            IntRangeValidator(root.longitude_minutes_edit_text,
+        mBinding.longitudeMinutesEditText.addTextChangedListener(
+            IntRangeValidator(mBinding.longitudeMinutesEditText,
                 0,
                 true,
                 59,
-                true,
-                { viewModel.ddmLocation.value!!.longitudeDecimalMinutes = it.toDouble() })
+                true
+            ) { viewModel.ddmLocation.value!!.longitudeDecimalMinutes = it }
         )
 
         mBinding.setToCurrentPositionIcon.setOnClickListener { setLocationToCurrentPosition() }
@@ -104,13 +97,10 @@ class LocationDdmDialogFragment : DialogFragment() {
 
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.tool_edit_location))
-//            .setNeutralButton(resources.getString(R.string.cancel)) { dialog, which ->
-//                dismiss();
-//            }
-            .setNegativeButton(resources.getString(R.string.cancel)) { dialog, which ->
+            .setNegativeButton(resources.getString(R.string.cancel)) { _, _ ->
                 dismiss()
             }
-            .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
+            .setPositiveButton(resources.getString(R.string.accept)) { _, _ ->
                 val listener: LocationDdmDialogListener? = targetFragment as LocationDdmDialogListener?
                 listener?.onDdmEditConfirmed()
                 dismiss()
@@ -124,10 +114,10 @@ class LocationDdmDialogFragment : DialogFragment() {
     fun setLocationToCurrentPosition() {
         viewModel.getLocation();
 
-        var tracker = GpsLocationTracker(requireContext())
+        val tracker = GpsLocationTracker(requireContext())
         if (tracker.canGetLocation()) {
 
-            var loc = tracker.location
+            val loc = tracker.location
             if (loc != null) {
                 viewModel.setNewLocation(loc)
             }
@@ -138,14 +128,15 @@ class LocationDdmDialogFragment : DialogFragment() {
     }
 
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        viewModel = ViewModelProviders.of(requireActivity()).get(LocationDdmViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity())[LocationDdmViewModel::class.java]
 
-        viewModel.ddmLocation.observe(this, Observer { dmsLoc ->
+        viewModel.ddmLocation.observe(this) { dmsLoc ->
             if (dmsLoc != null) {
-                mBinding?.viewmodel = dmsLoc
+                mBinding.viewmodel = dmsLoc
             }
-        })
+        }
         super.onActivityCreated(savedInstanceState)
     }
 

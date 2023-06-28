@@ -17,11 +17,7 @@
  */
 package no.sintef.fiskinfo.ui.snap
 
-import android.content.Intent
-import android.net.Uri
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -31,13 +27,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 import no.sintef.fiskinfo.R
-import no.sintef.fiskinfo.repository.SnapRepository
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.annotation.TargetApi
-import android.widget.Toast
 import android.net.http.SslError
 import android.webkit.SslErrorHandler
+import androidx.preference.PreferenceManager
+import no.sintef.fiskinfo.databinding.EchogramViewerFragmentBinding
 
 class EchogramViewerFragment : Fragment() {
 
@@ -46,6 +39,10 @@ class EchogramViewerFragment : Fragment() {
         const val ARG_SNAP_ID = "snap_id"
     }
 
+    private var _binding: EchogramViewerFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
 
     private lateinit var webView: WebView
 
@@ -54,24 +51,28 @@ class EchogramViewerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            snapId = it.getString(Companion.ARG_SNAP_ID)
+            snapId = it.getString(ARG_SNAP_ID)
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.echogram_viewer_fragment, container, false)
-    }
+    ): View {
+        _binding = EchogramViewerFragmentBinding.inflate(inflater, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         configureWebView()
         loadContent()
+
+        return binding.root
     }
 
-    fun configureWebView() {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun configureWebView() {
         if (getView() == null) return
         webView = requireView().findViewById(R.id.echogramviewer_fragment_web_view)
         with (webView.settings) {
@@ -81,7 +82,8 @@ class EchogramViewerFragment : Fragment() {
             setGeolocationEnabled(true)
             layoutAlgorithm = WebSettings.LayoutAlgorithm.NARROW_COLUMNS
         }
-        webView!!.webViewClient = object : WebViewClient() {
+        webView.webViewClient = object : WebViewClient() {
+            @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String): Boolean {
                 view?.loadUrl(url)
                 return true
@@ -93,14 +95,14 @@ class EchogramViewerFragment : Fragment() {
 
     }
 
-    val DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS = "https://129.242.16.123:37457/"
+    private val DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS = "https://129.242.16.123:37457/"
 
-    fun loadContent() {
+    private fun loadContent() {
         try {
             if (snapId == null)
                 return
 
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val prefs = PreferenceManager.getDefaultSharedPreferences(binding.root.context)
             val snapFishServerUrl = prefs.getString(getString(R.string.pref_snap_web_server_address), DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS)
             if (snapFishServerUrl != null) {
                 //val snapFishWebServerUrl = snapFishServerUrl.replace("5002", "5006").replace("http:", "https:")

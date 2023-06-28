@@ -223,14 +223,14 @@ flag for network status
         mAlertDialog.setMessage(getString(R.string.util_gps_enable_question))
         mAlertDialog.setPositiveButton(
             "dialog_settings"
-        ) { dialog, which ->
+        ) { _, _ ->
             val mIntent =
                 Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             mContext.startActivity(mIntent)
         }
         mAlertDialog.setNegativeButton(
             "cancel"
-        ) { dialog, which -> dialog.cancel() }
+        ) { dialog, _ -> dialog.cancel() }
         val mcreateDialog = mAlertDialog.create()
         mcreateDialog.show()
     }
@@ -250,6 +250,7 @@ flag for network status
 
     override fun onProviderDisabled(provider: String) {}
     override fun onProviderEnabled(provider: String) {}
+    @Deprecated("Deprecated in Java")
     override fun onStatusChanged(
         provider: String,
         status: Int,

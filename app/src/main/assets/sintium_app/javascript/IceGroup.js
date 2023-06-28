@@ -46,6 +46,8 @@ function iceChartStyleFunction(feature) {
             return veryOpenDriftIceStyle;
         case "Open Water":
             return openWaterStyle;
+        default:
+            return closeDriftIceStyle;
     }
 }
 

@@ -31,6 +31,7 @@ import android.view.ViewGroup
 import com.google.android.material.tabs.TabLayout
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.SnapFragmentBinding
 
 /**
  * The SnapFragment is the main container fragment for the echo snap message functionality.
@@ -39,14 +40,26 @@ import no.sintef.fiskinfo.R
  */
 class SnapFragment : Fragment() {
 
-    internal lateinit var viewPager: ViewPager
-    internal lateinit var snapPagerAdapter: SnapPageAdapter
+    private lateinit var viewPager: ViewPager
+    private lateinit var snapPagerAdapter: SnapPageAdapter
+    private var _mBinding: SnapFragmentBinding? = null
+
+    // This property is only valid between onCreateView and onDestroyView.
+    private val mBinding get() = _mBinding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.snap_fragment, container, false)
+    ): View {
+        _mBinding = SnapFragmentBinding.inflate(inflater, container, false)
+
+        return mBinding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _mBinding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,14 +81,17 @@ class SnapFragment : Fragment() {
         }
 
         override fun getItem(position: Int): Fragment {
-            return if (position == 0) {
-                SnapBoxFragment.newInstance(true)
+            return when (position) {
+                0 -> {
+                    SnapBoxFragment.newInstance(true)
 
-            } else if (position == 1) {
-                SnapBoxFragment.newInstance(false)
-            }
-            else {
-                EchogramListFragment.newInstance()
+                }
+                1 -> {
+                    SnapBoxFragment.newInstance(false)
+                }
+                else -> {
+                    EchogramListFragment.newInstance()
+                }
             }
         }
 

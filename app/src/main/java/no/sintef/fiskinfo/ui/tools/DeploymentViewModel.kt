@@ -21,67 +21,45 @@ package no.sintef.fiskinfo.ui.tools
 import android.app.Application
 import android.content.Context
 import android.location.Location
-import android.preference.PreferenceManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import androidx.preference.PreferenceManager
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.model.fishingfacility.DeploymentInfo
 import no.sintef.fiskinfo.model.fishingfacility.FiskInfoProfileDTO
 import no.sintef.fiskinfo.model.fishingfacility.ToolTypeCode
 import no.sintef.fiskinfo.repository.FishingFacilityRepository
 import no.sintef.fiskinfo.util.locationsToGeoJsonGeometry
-import no.sintef.fiskinfo.util.locationsToWTK
 import no.sintef.fiskinfo.utilities.ui.ObservableAndroidViewModel
 import java.util.*
 
 class DeploymentViewModel(application: Application) : ObservableAndroidViewModel(application) {
-
-    //private val deploymentInfo = MutableLiveData<DeploymentInfo>()
-    //private val toolTypeCodeName = MutableLiveData<String>() // Name is separate propery to support localization
     val toolTypeCode = MutableLiveData<ToolTypeCode>()
     val setupTime = MutableLiveData<Date>()
     val locations = MutableLiveData<MutableList<Location>>()
     val toolCount = MutableLiveData<String>()
     var initialized = false
 
-    //val getDeploymentInfo: LiveData<DeploymentInfo>
-    //    get() = deploymentInfo
-
     private fun createDeploymentInfo(): DeploymentInfo {
-        //val fishingFacilityRepository = FishingFacilityRepository.getInstance(this.getApplication())
-        val profile = getFiskInfoProfileDTO()
-        // TODO: Add validation of the profile somewhere
-        val fiskInfoProfile = profile?.value?.fiskinfoProfile!!
-        //var context : Context = getApplication()
-        //val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-
         getContactInfoFromPreferences()
 
-        val geometryStr = locationsToWTK(locations.value!!)
-        val info = DeploymentInfo(
+        return DeploymentInfo(
             toolId = UUID.randomUUID().toString(),
             setupTime = setupTime.value!!,
-//            ircs =  fiskInfoProfile.ircs,
-//            contactPersonEmail = this.contactPersonEmail!!, // prefs.getString(context.getString(R.string.pref_contact_person_email), ""),
-            contactEmail = this.contactPersonEmail!!, // prefs.getString(context.getString(R.string.pref_contact_person_name), ""),
-            contactPhone = this.contactPersonPhone!!, // prefs.getString(context.getString(R.string.pref_contact_person_phone), ""),
+            contactEmail = contactPersonEmail!!,
+            contactPhone = contactPersonPhone!!,
             toolTypeCode = toolTypeCode.value!!,
             toolCount = toolCount.value!!.toInt(),
             geometry = locationsToGeoJsonGeometry(locations.value!!)
         )
-        return info;
-
-        //val prefs = PreferenceManager.getDefaultSharedPreferences(getApplication())
-        //info.toolTypeCode = ToolTypeCode.valueOf(prefs.getString("default_tool_type", ToolTypeCode.NETS.code))
-        //deploymentInfo.value = info
     }
 
-    var contactPersonEmail: String? = null
-    var contactPersonPhone: String? = null
+    private var contactPersonEmail: String? = null
+    private var contactPersonPhone: String? = null
 
-    fun getContactInfoFromPreferences() {
-        var context: Context = getApplication()
+    private fun getContactInfoFromPreferences() {
+        val context: Context = getApplication()
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
         contactPersonEmail =
@@ -97,11 +75,11 @@ class DeploymentViewModel(application: Application) : ObservableAndroidViewModel
 
     fun initContent() {
         if (!initialized) {
-            var context: Context = getApplication()
+            val context: Context = getApplication()
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
             val preferenceToolType = prefs.getString(
-                context.getString(R.string.pref_tool_type)!!,
+                context.getString(R.string.pref_tool_type),
                 ToolTypeCode.NETS.code
             )!!
 
@@ -113,7 +91,6 @@ class DeploymentViewModel(application: Application) : ObservableAndroidViewModel
             )!!
             toolCount.value = preferenceToolCount
             setupTime.value = Date()
-            //toolTypeCode.value = ToolTypeCode.NETS
             val defaultLoc = Location("")
             // TODO: Default locations
             defaultLoc.latitude = 0.0  //your coords of course
@@ -162,23 +139,21 @@ class DeploymentViewModel(application: Application) : ObservableAndroidViewModel
         }
     */
     fun setSetupDate(date: Date) {
-        if (date != null) {
-            // TODO: pick out only date part (not time)
-            val c = Calendar.getInstance()
-            c.time = setupTime.value
+        // TODO: pick out only date part (not time)
+        val c = Calendar.getInstance()
+        c.time = setupTime.value!!
 
-            val newDateC = Calendar.getInstance()
-            newDateC.time = date
-            c.set(Calendar.YEAR, newDateC.get(Calendar.YEAR))
-            c.set(Calendar.DAY_OF_YEAR, newDateC.get(Calendar.DAY_OF_YEAR))
+        val newDateC = Calendar.getInstance()
+        newDateC.time = date
+        c.set(Calendar.YEAR, newDateC.get(Calendar.YEAR))
+        c.set(Calendar.DAY_OF_YEAR, newDateC.get(Calendar.DAY_OF_YEAR))
 
-            setupTime.value = c.time
-        }
+        setupTime.value = c.time
     }
 
     fun setSetupTime(hourOfDay: Int, minutes: Int) {
         val c = Calendar.getInstance()
-        c.time = setupTime.value
+        c.time = setupTime.value!!
         c.set(Calendar.HOUR_OF_DAY, hourOfDay)
         c.set(Calendar.MINUTE, minutes)
         setupTime.value = c.time

@@ -17,33 +17,22 @@
  */
 package no.sintef.fiskinfo.ui.snap
 
-import androidx.cursoradapter.widget.SimpleCursorAdapter
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-
 import android.Manifest
 import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
-
 import android.provider.ContactsContract
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.FilterQueryProvider
 import android.widget.MultiAutoCompleteTextView
-
+import androidx.cursoradapter.widget.SimpleCursorAdapter
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.databinding.SnapEditorFragmentBinding
-import no.sintef.fiskinfo.model.SnapMessage
 
 class SnapEditorFragment : Fragment() {
 
@@ -54,20 +43,16 @@ class SnapEditorFragment : Fragment() {
     internal var mContentResolver: ContentResolver? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _mBinding = DataBindingUtil.inflate<SnapEditorFragmentBinding>(
-            inflater,
-            R.layout.snap_editor_fragment,
-            container,
-            false
-        )
+    ): View {
+        _mBinding = SnapEditorFragmentBinding.inflate(inflater, container, false)
         setHasOptionsMenu(true)
 
         mContentResolver = requireContext().contentResolver
         mBinding.snapReceiverEditText.setTokenizer(MultiAutoCompleteTextView.CommaTokenizer())
-        mBinding.snapReceiverEditText.setThreshold(1)
+        mBinding.snapReceiverEditText.threshold = 1
 
         val from = arrayOf(
             ContactsContract.Contacts.DISPLAY_NAME,
@@ -116,15 +101,15 @@ class SnapEditorFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProviders.of(requireActivity()).get(SnapViewModel::class.java)
-        mViewModel.draft.observe(viewLifecycleOwner, Observer { snap ->
+        mViewModel = ViewModelProvider(requireActivity()).get(SnapViewModel::class.java)
+        mViewModel.draft.observe(viewLifecycleOwner) { snap ->
             if (snap != null) {
                 mBinding.snap = snap
                 //mBinding!!.setEchogram(mViewModel?.draftMetadata)
                 mBinding.handlers = this@SnapEditorFragment
                 mBinding.snapviewmodel = mViewModel
             }
-        })
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && requireActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), PERMISSIONS_REQUEST_READ_CONTACTS)
         }
@@ -157,6 +142,6 @@ class SnapEditorFragment : Fragment() {
             return SnapEditorFragment()
         }
 
-        private val PERMISSIONS_REQUEST_READ_CONTACTS = 100
+        private const val PERMISSIONS_REQUEST_READ_CONTACTS = 100
     }
 }

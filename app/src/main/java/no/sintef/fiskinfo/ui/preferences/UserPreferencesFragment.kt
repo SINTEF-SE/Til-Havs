@@ -46,6 +46,10 @@ class UserPreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.On
         //configureEditTextInputType("pref_user_id", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_NORMAL)
         //configureEditTextInputType("pref_tool_days_before_old", InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_NORMAL)
 
+        configureEditTextInputType(getString(R.string.pref_sprice_username_key), InputType.TYPE_CLASS_TEXT)
+        configureEditTextInputType(getString(R.string.pref_sprice_password_key), InputType.TYPE_TEXT_VARIATION_PASSWORD)
+        configureEditTextInputType(getString(R.string.pref_sprice_call_sign_key), InputType.TYPE_CLASS_TEXT)
+
         val consentPreference : Preference? = findPreference("consent")
         consentPreference?.setOnPreferenceClickListener {
             Navigation.findNavController(requireView()).navigate(R.id.consentFragment)
@@ -64,18 +68,21 @@ class UserPreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.On
 
     override fun onResume() {
         super.onResume()
-        getPreferenceScreen().getSharedPreferences()
-            .registerOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences
+            ?.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onPause() {
         super.onPause()
-        getPreferenceScreen().getSharedPreferences()
-            .unregisterOnSharedPreferenceChangeListener(this)
+        preferenceScreen.sharedPreferences
+            ?.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         if ((key == "server_address") && (context != null))
             SnapRepository.getInstance(requireContext()).updateFromPreferences(context)
+        else if(key == getString(R.string.pref_sprice_enable_service_key)) {
+            // TODO: Update side menu
+        }
     }
 }

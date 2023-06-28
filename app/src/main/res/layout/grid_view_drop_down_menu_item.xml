@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><!-- XML implementation of Card Layout -->
+<com.google.android.material.textfield.TextInputLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    android:id="@+id/grid_view_item_text_input_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="25dp"
+    android:maxLines="5"
+    android:ellipsize="none"
+    android:scrollHorizontally="false"
+    app:errorEnabled="true"
+    >
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        android:id="@+id/layout_grid_view_drop_down_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="5"
+        android:ellipsize="none"
+        android:scrollHorizontally="false"
+        android:focusable="true"
+        />
+</com.google.android.material.textfield.TextInputLayout>

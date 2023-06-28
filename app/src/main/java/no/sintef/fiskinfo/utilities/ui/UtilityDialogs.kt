@@ -17,15 +17,9 @@
  */
 package no.sintef.fiskinfo.utilities.ui
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.view.View
-import android.view.Window
 import android.view.WindowManager
-import android.widget.TextView
-//import fiskinfoo.no.sintef.fiskinfoo.Baseclasses.HyperlinkAlertDialog
-//import fiskinfoo.no.sintef.fiskinfoo.R
 
 class UtilityDialogs : DialogInterface {
     override fun getDialog(
@@ -35,7 +29,7 @@ class UtilityDialogs : DialogInterface {
     ): Dialog? {
         if (context == null)
             return null
-        val dialog = Dialog(context!!)
+        val dialog = Dialog(context)
         dialog.setContentView(layoutId)
         dialog.setTitle(titleId)
         dialog.setCanceledOnTouchOutside(false)
@@ -50,58 +44,11 @@ class UtilityDialogs : DialogInterface {
     ): Dialog? {
         if (context == null)
             return null
-        val dialog = Dialog(context!!)
+        val dialog = Dialog(context)
         dialog.setContentView(layoutId)
         dialog.setTitle(title)
         dialog.setCanceledOnTouchOutside(false)
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
         return dialog
     }
-/*
-    override fun getDialogWithTitleIcon(
-        context: Context?,
-        layoutId: Int,
-        title: String?,
-        iconId: Int
-    ): Dialog? {
-        val dialog = Dialog(context)
-        dialog.requestWindowFeature(Window.FEATURE_LEFT_ICON)
-        dialog.setContentView(layoutId)
-        dialog.setTitle(title)
-        dialog.setFeatureDrawableResource(
-            Window.FEATURE_LEFT_ICON,
-            R.drawable.ikon_kart_til_din_kartplotter
-        )
-        dialog.setCanceledOnTouchOutside(false)
-        if (dialog.window != null) {
-            dialog.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
-        }
-        return dialog
-    }
-
-    override fun getHyperlinkAlertDialog(
-        context: Context?,
-        title: String?,
-        message: String?
-    ): AlertDialog? {
-        return HyperlinkAlertDialog.create(context, title, message)
-    }
-
-    override fun getCheckboxInformationDialog(
-        context: Context?,
-        title: String?,
-        infoText: String?
-    ): Dialog? {
-        val dialog = Dialog(context)
-        dialog.setContentView(R.layout.dialog_information_checkbox)
-        dialog.setTitle(title)
-        dialog.setCanceledOnTouchOutside(false)
-        val textView =
-            dialog.findViewById<View>(R.id.checkbox_dialog_text_view) as TextView
-        textView.text = infoText
-        if (dialog.window != null) {
-            dialog.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
-        }
-        return dialog
-    }*/
 }

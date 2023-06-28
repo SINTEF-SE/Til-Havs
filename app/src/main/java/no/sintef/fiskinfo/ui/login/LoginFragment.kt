@@ -21,11 +21,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,16 +34,25 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import net.openid.appauth.*
 import no.sintef.fiskinfo.BuildConfig
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.LoginFragmentBinding
 import no.sintef.fiskinfo.util.AuthStateManager
 
 
 class LoginFragment : Fragment() {
     companion object {
         fun newInstance() = LoginFragment()
+
+        const val ISSUER_URI = BuildConfig.SERVER_ID_URL
+        const val CLIENT_ID = BuildConfig.FISKINFO_BW_CLIENT_ID
+        const val REDIRECT_URI = BuildConfig.FISKINFO_BW_CLIENT_REDIRECT_URL
+        const val SCOPE = BuildConfig.FISKINFO_BW_CLIENT_SCOPE
+        const val REQCODE_AUTH = 100
+        const val CLIENT_SECRET = BuildConfig.FISKINFO_BW_CLIENT_SECRET
     }
     private val viewModel: LoginViewModel by activityViewModels()
     private lateinit var mAuthService : AuthorizationService
@@ -57,41 +62,73 @@ class LoginFragment : Fragment() {
     private lateinit var consentStepText: TextView
     private lateinit var loginStepText: TextView
 
+    private var _binding: LoginFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.login_fragment, container, false)
+    ): View {
+        _binding = LoginFragmentBinding.inflate(inflater, container, false)
 
         authStateManager = AuthStateManager.getInstance(this.requireContext())
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(binding.root.context)
         val consent = prefs.getBoolean("user_consent_to_terms", false)
-        view.findViewById<View>(R.id.consent_step_layout).visibility = if (consent) View.GONE else View.VISIBLE
-        view.findViewById<View>(R.id.login_step_layout).visibility = if (consent) View.VISIBLE else View.GONE
+        binding.consentStepLayout.visibility = if (consent) View.GONE else View.VISIBLE
+        binding.loginStepLayout.visibility = if (consent) View.VISIBLE else View.GONE
 
-        loginButton = view.findViewById(R.id.sign_in_button)
+        loginButton = binding.signInButton
         loginButton.setOnClickListener {
             startAuthentication()
         }
 
-        consentButton = view.findViewById(R.id.consent_step_button)
+        consentButton = binding.consentStepButton.findViewById(R.id.consent_step_button)
         consentButton.setOnClickListener {
             Navigation.findNavController(this.requireView()).navigate(R.id.consentFragment)
         }
 
-        return view
+        mAuthService = AuthorizationService(this.requireActivity())
+
+        val navController = findNavController()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            viewModel.refuseAuthentication()
+        }
+
+        viewModel.authenticationState.observe(viewLifecycleOwner) { authenticationState ->
+            when (authenticationState) {
+                LoginViewModel.AuthenticationState.AUTHENTICATED -> {
+                    navController.popBackStack()
+                    val imm =
+                        activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(requireView().windowToken, 0)
+                }
+                LoginViewModel.AuthenticationState.INVALID_AUTHENTICATION ->
+                    Snackbar.make(
+                        requireView(),
+                        R.string.login_error_incorrect_password,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                LoginViewModel.AuthenticationState.UNAUTHENTICATED -> Snackbar.make(
+                    requireView(),
+                    R.string.login_error_incorrect_password,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        return binding.root
     }
 
-    val ISSUER_URI = BuildConfig.SERVER_ID_URL;
-    val CLIENT_ID = BuildConfig.FISKINFO_BW_CLIENT_ID;
-    val REDIRECT_URI = BuildConfig.FISKINFO_BW_CLIENT_REDIRECT_URL;
-    val SCOPE = BuildConfig.FISKINFO_BW_CLIENT_SCOPE;
-    val REQCODE_AUTH = 100
-    val CLIENT_SECRET = BuildConfig.FISKINFO_BW_CLIENT_SECRET;
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
     fun startAuthentication() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(binding.root.context)
         val consent = prefs.getBoolean("user_consent_to_terms", false)
         if (true) { //!consent)
             //Navigation.findNavController(this.requireView()).navigate(R.id.consentFragment)
@@ -142,17 +179,17 @@ class LoginFragment : Fragment() {
                     mAuthService
                         .performTokenRequest(
                             resp!!.createTokenExchangeRequest(),
-                            clientAuth,
-                            { resp2, ex2 ->
-                                if (resp2 != null) {
+                            clientAuth
+                        ) { resp2, ex2 ->
+                            if (resp2 != null) {
 
-                                    authStateManager.updateAfterTokenResponse(resp2, ex2)
-                                    viewModel.authenticate()
+                                authStateManager.updateAfterTokenResponse(resp2, ex2)
+                                viewModel.authenticate()
 
-                                } else {
-                                    showLoginFailedMessage("Could not get login token", ex2.toString())
-                                }
-                            })
+                            } else {
+                                showLoginFailedMessage("Could not get login token", ex2.toString())
+                            }
+                        }
                 } else  {
                     showLoginFailedMessage("Login cancelled", "")
                 }
@@ -166,36 +203,6 @@ class LoginFragment : Fragment() {
     private fun showLoginFailedMessage(message : String, details : String?) {
         Snackbar.make(requireView(), message , Snackbar.LENGTH_LONG)
             .show()
-    }
-
-
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mAuthService = AuthorizationService(this.requireActivity())
-
-        val navController = findNavController()
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.refuseAuthentication()
-        }
-
-        viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
-            when (authenticationState) {
-                LoginViewModel.AuthenticationState.AUTHENTICATED -> {
-                    navController.popBackStack()
-                    val imm =
-                        activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(requireView().windowToken, 0)
-                }
-                LoginViewModel.AuthenticationState.INVALID_AUTHENTICATION ->
-                    Snackbar.make(
-                        requireView(),
-                        R.string.login_error_incorrect_password,
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-            }
-        })
-
     }
 
 }

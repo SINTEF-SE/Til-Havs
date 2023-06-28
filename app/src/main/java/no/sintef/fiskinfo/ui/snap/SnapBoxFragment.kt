@@ -23,16 +23,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.SnapInboxFragmentBinding
 import no.sintef.fiskinfo.model.SnapMessage
 
 /**
@@ -53,67 +52,52 @@ class SnapBoxFragment : Fragment(), SnapRecyclerViewAdapter.OnSnapInteractionLis
     private var mIsInbox : Boolean = true
     private val IS_INBOX = "IsInbox"
 
+    private var _binding: SnapInboxFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mIsInbox = arguments?.getBoolean(IS_INBOX, true) ?: true
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProviders.of(requireActivity()).get(SnapViewModel::class.java)
-        val box = if (mIsInbox) mViewModel!!.getInboxSnaps() else mViewModel!!.getOutboxSnaps()
-
-        box?.observe(viewLifecycleOwner,
-            Observer { snaps ->
-                mAdapter!!.setSnaps(snaps)
-                if (mSwipeLayout != null)
-                    mSwipeLayout!!.isRefreshing = false
-            })
-
-/*        mViewModel!!.getInboxSnaps()!!.observe(this,
-            Observer { snaps ->
-                mAdapter!!.setSnaps(snaps)
-                if (mSwipeLayout != null)
-                    mSwipeLayout!!.isRefreshing = false
-            })
-*/
-        /*        ViewParent parent = this.getView().getParent();
-        if (parent instanceof ViewPager) {
-            TabLayout tabLayout = (TabLayout) ((ViewPager) parent).findViewById(R.id.snaptab_layout);
-            tabLayout.getTabAt(1).setIcon(R.drawable.ic_info);
-        }*/
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
+    ): View {
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext())
 
-        val view = inflater.inflate(R.layout.snap_inbox_fragment, container, false)
+        _binding = SnapInboxFragmentBinding.inflate(inflater, container, false)
 
-        val listView = view.findViewById<RecyclerView>(R.id.inbox_list)
-        val context = view.context
-        listView.setLayoutManager(LinearLayoutManager(context))
+        val listView = binding.inboxList
+        val context = binding.root.context
+        listView.layoutManager = LinearLayoutManager(context)
         mAdapter = SnapRecyclerViewAdapter(this, mIsInbox)
-        listView.setAdapter(mAdapter)
+        listView.adapter = mAdapter
 
-        mSwipeLayout = view.findViewById(R.id.inboxswipelayout) as SwipeRefreshLayout
-        //swipeLayout.setProgressBackgroundColorSchemeResource(R.color.colorBrn);
+        mSwipeLayout = binding.inboxswipelayout
 
         if (mIsInbox) // Refresh only supported on inbox as outbox is currently only local on phone
             mSwipeLayout!!.setOnRefreshListener { mViewModel!!.refreshInboxContent() }
 
 
-        /*        if (container instanceof ViewPager) {
-               TabLayout tabLayout = (TabLayout) ((ViewPager) container).findViewById(R.id.snaptab_layout);
-               tabLayout.getTabAt(1).setIcon(R.drawable.ic_info);
-               View customTab = inflater.inflate(R.layout.tab_with_icon_and_title, container, false);
-               tabLayout.getTabAt(1).setCustomView(customTab);
-               TextView tabText = customTab.findViewById(R.id.tabTextView);
-               tabText.setText("Inbox");
-           }*/
-        return view
+        mViewModel = ViewModelProvider(requireActivity()).get(SnapViewModel::class.java)
+        val box = if (mIsInbox) mViewModel!!.getInboxSnaps() else mViewModel!!.getOutboxSnaps()
+
+        box?.observe(viewLifecycleOwner
+        ) { snaps ->
+            mAdapter!!.setSnaps(snaps)
+            if (mSwipeLayout != null)
+                mSwipeLayout!!.isRefreshing = false
+        }
+
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewSnapClicked(v: View, snap: SnapMessage?) {

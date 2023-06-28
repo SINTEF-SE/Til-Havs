@@ -19,10 +19,9 @@
  */
 package no.sintef.fiskinfo.util
 
-import android.R
-import android.content.res.Resources
+import android.content.res.Configuration
+import android.os.Build
 import android.view.View
-import android.widget.EditText
 
 import android.widget.TextView
 
@@ -139,7 +138,7 @@ fun getNumberFormat(view: View): NumberFormat {
 object DoubleConverter {
     @InverseMethod("stringToDouble")
     @JvmStatic fun doubleToString(
-        view: TextView, oldValue: Double,
+        view: TextView,
         value: Double
     ): String {
         val numberFormat: NumberFormat = getNumberFormat(view)
@@ -147,7 +146,7 @@ object DoubleConverter {
             // Don't return a different value if the parsed value
             // doesn't change
             val inView = view.text.toString()
-            val parsed: Double = numberFormat.parse(inView).toDouble()
+            val parsed: Double = numberFormat.parse(inView)!!.toDouble()
             if (parsed == value) {
                 return view.text.toString()
             }
@@ -159,27 +158,32 @@ object DoubleConverter {
 
     @JvmStatic fun stringToDouble(
         view: TextView, oldValue: Double,
-        value: String?
+        value: String
     ): Double {
         val numberFormat: NumberFormat = getNumberFormat(view)
         return try {
-            numberFormat.parse(value).toDouble()
+            numberFormat.parse(value)!!.toDouble()
         } catch (e: ParseException) {
-            val resources: Resources = view.resources
-            val errStr: String = "not a valid number" //resources.getString(R.string.badNumber)
+            val errStr = "not a valid number" //resources.getString(R.string.badNumber)
             view.error = errStr
             oldValue
         }
     }
 
-
     private fun getNumberFormat(view: View): NumberFormat {
-        val resources: Resources = view.getResources()
-        val locale: Locale = resources.getConfiguration().locale
+        val configuration: Configuration = view.resources.configuration
+
+        val locale: Locale = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            configuration.locales.get(0)
+        } else {
+            @Suppress("DEPRECATION")
+            configuration.locale
+        }
+
         val format: NumberFormat = NumberFormat.getNumberInstance(locale)
         if (format is DecimalFormat) {
-            val decimalFormat: DecimalFormat = format as DecimalFormat
-            decimalFormat.setGroupingUsed(false)
+            val decimalFormat: DecimalFormat = format
+            decimalFormat.isGroupingUsed = false
         }
         return format
     }

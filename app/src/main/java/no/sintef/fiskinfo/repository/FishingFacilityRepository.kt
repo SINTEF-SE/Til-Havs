@@ -24,7 +24,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 import net.openid.appauth.AuthorizationService
 import no.sintef.fiskinfo.BuildConfig
-import no.sintef.fiskinfo.api.FishingFacilityReportService
+import no.sintef.fiskinfo.api.barentswatch.FishingFacilityReportService
 import no.sintef.fiskinfo.api.createService
 import no.sintef.fiskinfo.model.fishingfacility.*
 import no.sintef.fiskinfo.util.AuthStateManager
@@ -34,27 +34,21 @@ import retrofit2.Response
 import java.util.ArrayList
 
 class FishingFacilityRepository(context: Context) {
-    internal var fishingFacilityService: FishingFacilityReportService? = null
-    internal var snapFishServerUrl: String? = DEFAULT_SNAP_FISH_SERVER_URL
-
+    private var fishingFacilityService: FishingFacilityReportService? = null
+    private val bwServerUrl = BuildConfig.SERVER_URL
+    private var mFirebaseAnalytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     internal var confirmedTools = MutableLiveData<List<ToolViewModel>>()
     internal val unconfirmedTools = MutableLiveData<List<ToolViewModel>>()
     internal val fiskInfoProfileDTO = MutableLiveData<FiskInfoProfileDTO>()
-
     internal val authStateManager = AuthStateManager.getInstance(context)
     internal val authService = AuthorizationService(context)
 
-    private var mFirebaseAnalytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
-
-//    val bwServerUrl = "https://www.barentswatch.no/";
-    val bwServerUrl = BuildConfig.SERVER_URL;
-
     init {
-        updateFromPreferences(context)
+        updateFromPreferences()
     }
 
-    fun updateFromPreferences(context: Context) {}
+    fun updateFromPreferences() {}
 
 
     fun getConfirmedTools(): LiveData<List<ToolViewModel>> {
@@ -76,14 +70,13 @@ class FishingFacilityRepository(context: Context) {
     data class SendResult(val success : Boolean, val responseCode : Int, val errorMsg : String )
 
     fun sendRetrieved(info : RetrievalInfoDto):LiveData<SendResult> {
-        var result = MutableLiveData<SendResult>()
+        val result = MutableLiveData<SendResult>()
         if (fishingFacilityService == null)
             initService()
 
-        authStateManager.current.performActionWithFreshTokens(authService) { accessToken, _, ex ->
+        authStateManager.current.performActionWithFreshTokens(authService) { _, _, ex ->
             if (ex == null) {
                 fishingFacilityService?.sendRetrieved(info)?.enqueue(object : Callback<Void?> {
-                    //<JsonElement?> {
                     override fun onFailure(call: Call<Void?>, t: Throwable) {
                         result.value = SendResult(false, 0, t.stackTrace.toString())
                     }
@@ -102,19 +95,18 @@ class FishingFacilityRepository(context: Context) {
                 })
             }
         }
-        return result;
+        return result
     }
 
     fun sendDeploymentInfo(info : DeploymentInfo):LiveData<SendResult> {
 
-        var result = MutableLiveData<SendResult>()
+        val result = MutableLiveData<SendResult>()
         if (fishingFacilityService == null)
             initService()
 
-        authStateManager.current.performActionWithFreshTokens(authService) { accessToken, _, ex ->
+        authStateManager.current.performActionWithFreshTokens(authService) { _, _, ex ->
             if (ex == null) {
                 fishingFacilityService?.sendDeploymentInfo(info)?.enqueue(object : Callback<Void?> {
-                    //<JsonElement?> {
                     override fun onFailure(call: Call<Void?>, t: Throwable) {
                         result.value = SendResult(false, 0, t.stackTrace.toString())
                     }
@@ -133,7 +125,7 @@ class FishingFacilityRepository(context: Context) {
                 })
             }
         }
-        return result;
+        return result
     }
 
 
@@ -160,11 +152,11 @@ class FishingFacilityRepository(context: Context) {
             createService(FishingFacilityReportService::class.java,bwServerUrl , authService, authStateManager.current)
     }
 
-    fun refreshFiskInfoProfileDTO() {
+    private fun refreshFiskInfoProfileDTO() {
         if (fishingFacilityService == null)
             initService()
 
-        authStateManager.current.performActionWithFreshTokens(authService) { accessToken, _, ex ->
+        authStateManager.current.performActionWithFreshTokens(authService) { _, _, ex ->
             if (ex == null) {
                 fishingFacilityService?.getFishingFacilityProfile()
                     ?.enqueue(object : Callback<FiskInfoProfileDTO> {
@@ -194,7 +186,7 @@ class FishingFacilityRepository(context: Context) {
         unconfirmed.addAll(changes.failedChangeReports.map { toToolModel(it) })
 
         for (facility in changes.pendingChangeReports) {
-            val vm = unconfirmed.find { it -> it.toolId == facility.toolId }
+            val vm = unconfirmed.find { it.toolId == facility.toolId }
             vm?.setupDateTime = facility.setupDateTime
             vm?.lastChangedDateTime = facility.lastChangedDateTime
         }
@@ -208,13 +200,7 @@ class FishingFacilityRepository(context: Context) {
         return confirmed
     }
 
-    fun toToolModel(report : Report):ToolViewModel {
-        with (report) {
-            return ToolViewModel(toolId, id, toolTypeCode, geometry, comment, type, confirmed, responseStatus, responseReason, responseDateTime, errorReportedFromApi, setupDateTime = null, lastChangedDateTime = null)
-        }
-    }
-
-    fun toToolModel(facility : FishingFacility):ToolViewModel {
+    private fun toToolModel(facility : FishingFacility):ToolViewModel {
         with (facility) {
             return ToolViewModel(toolId, null, toolTypeCode, geometry, comment, FishingFacilityChangeType.DEPLOYED, true, setupDateTime = setupDateTime, lastChangedDateTime = lastChangedDateTime)
         }
@@ -224,7 +210,7 @@ class FishingFacilityRepository(context: Context) {
         if (fishingFacilityService == null)
             initService()
 
-        authStateManager.current.performActionWithFreshTokens(authService) { accessToken, _, ex ->
+        authStateManager.current.performActionWithFreshTokens(authService) { _, _, ex ->
             if (ex == null) {
                 fishingFacilityService?.getFishingFacilityChanges()
                     ?.enqueue(object : Callback<FishingFacilityChanges> {
@@ -246,14 +232,11 @@ class FishingFacilityRepository(context: Context) {
                     })
             }
         }
-//            createService(BarentswatchService::class.java,bwServerUrl , AuthorizationService(this.requireActivity()), viewModel.appAuthState)
-//            createService(BarentswatchService::class.java,bwServerUrl )
     }
 
     companion object {
         var instance: FishingFacilityRepository? = null
 
-        internal val DEFAULT_SNAP_FISH_SERVER_URL = "http://129.242.16.123:37789/"
         fun getInstance(context: Context): FishingFacilityRepository {
             if (instance == null)
                 instance = FishingFacilityRepository(context)

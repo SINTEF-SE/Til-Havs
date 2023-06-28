@@ -18,28 +18,21 @@
 package no.sintef.fiskinfo.ui.tools
 
 import android.os.Bundle
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.LinearLayoutCompat
-import com.google.android.material.textfield.TextInputEditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 import no.sintef.fiskinfo.R
-import no.sintef.fiskinfo.model.fishingfacility.FishingFacility
+import no.sintef.fiskinfo.databinding.ToolListFragmentBinding
 import no.sintef.fiskinfo.model.fishingfacility.ToolViewModel
 
 
@@ -51,38 +44,22 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
 
     private val mViewModel: ToolsViewModel by activityViewModels()
 
-    private var mAdapter: ToolsRecyclerViewAdapter? = null
-    private var mSwipeLayout: SwipeRefreshLayout? = null
-    private var mIsConfirmed : Boolean = false
-    private val IS_CONFIRMED_TOOLS = "IsConfirmedTools"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mIsConfirmed = arguments?.getBoolean(IS_CONFIRMED_TOOLS, false) ?: false
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        val tools = if (mIsConfirmed) mViewModel!!.getConfirmedTools() else mViewModel!!.getUnconfirmedTools()
-
-        tools?.observe(viewLifecycleOwner,
-            Observer<List<ToolViewModel>> { _tools ->
-                mAdapter!!.setTools(_tools)
-                if (mSwipeLayout != null)
-                    mSwipeLayout!!.isRefreshing = false
-            })
-    }
+    private var _binding: ToolListFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
+    ): View {
+        _binding = ToolListFragmentBinding.inflate(inflater, container, false)
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext())
 
-        val view = inflater.inflate(R.layout.tool_list_fragment, container, false)
 
-        val listView = view.findViewById<RecyclerView>(R.id.tool_list)
-        val fab = view.findViewById<FloatingActionButton>(R.id.fab)
+        val listView = binding.toolList
+        val fab = binding.fab
         if (mIsConfirmed)
             fab.visibility = View.GONE // No fab for confirmed tools
 
@@ -110,7 +87,7 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
                         param(FirebaseAnalytics.Param.SCREEN_CLASS, "ToolListFragment")
                     }
 
-                    var depViewModel = ViewModelProviders.of(requireActivity()).get(
+                    val depViewModel = ViewModelProvider(requireActivity()).get(
                         DeploymentViewModel::class.java
                     )
                     depViewModel.clear()
@@ -121,35 +98,48 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
             }
         }
 
-        val context = view.context
+        val context = binding.root.context
         listView.layoutManager = LinearLayoutManager(context)
         mAdapter = ToolsRecyclerViewAdapter(this, mIsConfirmed)
         listView.adapter = mAdapter
 
-        mSwipeLayout = view.findViewById(R.id.toollistswipelayout) as SwipeRefreshLayout
-        //swipeLayout.setProgressBackgroundColorSchemeResource(R.color.colorBrn);
-        mSwipeLayout!!.setOnRefreshListener { mViewModel!!.refreshTools() }
+        mSwipeLayout = binding.toollistswipelayout
+        mSwipeLayout!!.setOnRefreshListener { mViewModel.refreshTools() }
 
-        return view
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private var mAdapter: ToolsRecyclerViewAdapter? = null
+    private var mSwipeLayout: SwipeRefreshLayout? = null
+    private var mIsConfirmed : Boolean = false
+    private val IS_CONFIRMED_TOOLS = "IsConfirmedTools"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mIsConfirmed = arguments?.getBoolean(IS_CONFIRMED_TOOLS, false) ?: false
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val tools = if (mIsConfirmed) mViewModel.getConfirmedTools() else mViewModel.getUnconfirmedTools()
+
+        tools?.observe(viewLifecycleOwner
+        ) { _tools ->
+            mAdapter!!.setTools(_tools)
+            if (mSwipeLayout != null)
+                mSwipeLayout!!.isRefreshing = false
+        }
     }
 
     private fun isUserProfileValid():Boolean {
-        return true;
+        return true
     }
 
-
-/*
-    override fun onViewSnapClicked(v: View, snap: SnapMessage?) {
-        mViewModel!!.selectSnap(snap, mIsInbox)
-        Navigation.findNavController(v).navigate(R.id.action_fragment_snap_to_snapDetailFragment)
-    }
-
-    override fun onViewSnapInMapClicked(v: View, snap: SnapMessage?) {
-        val toast = Toast.makeText(this.context, "Not yet implemented!", Toast.LENGTH_SHORT)
-        toast.show()
-    }
-
-*/
     companion object {
         @JvmStatic
         fun newInstance(isConfirmedTools: Boolean) = ToolListFragment().apply {
@@ -160,32 +150,24 @@ class ToolListFragment : Fragment(), ToolsRecyclerViewAdapter.OnToolInteractionL
     }
 
     override fun onViewToolClicked(v: View, tool: ToolViewModel?) {
-        mViewModel!!.selectTool(tool, mIsConfirmed)
+        mViewModel.selectTool(tool)
         Navigation.findNavController(v).navigate(R.id.action_tools_fragment_to_tool_details_fragment)
     }
 
     override fun onRemoveToolClicked(v: View, tool: ToolViewModel?) {
         if (mIsConfirmed && (tool != null)){
-            var toolTypeStr = if (tool.toolTypeCode != null) tool.toolTypeCode?.getLocalizedName(requireContext())!!.toLowerCase() else "tool"
+            val toolTypeStr = if (tool.toolTypeCode != null) tool.toolTypeCode?.getLocalizedName(requireContext())!!.lowercase() else "tool"
 
             val builder = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(getString(R.string.tool_report_retrieval_heading) + toolTypeStr)
                 .setMessage(getString(R.string.tool_report_retrieval_message_confirm))
-                //            .setNeutralButton(resources.getString(R.string.cancel)) { dialog, which ->
-                //                dismiss();
-                //            }
-                .setNegativeButton(resources.getString(R.string.cancel)) { dialog, which ->
+                .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ ->
                     dialog.cancel()
                 }
-                .setPositiveButton(resources.getString(R.string.accept)) { dialog, which ->
-                    val sendRetrievedReport =
-                        mViewModel.sendRetrievedReport(tool)
-                    //sendRetrievedReport.observe(viewLifecycleOwner, Observer {
-                    //    sendRetrievedReport.removeObservers(viewLifecycleOwner)
-                    //})
+                .setPositiveButton(resources.getString(R.string.accept)) { dialog, _ ->
+                    mViewModel.sendRetrievedReport(tool)
                     dialog.dismiss()
                 }
-            //builder.setView(view)
             builder.create().show()
         }
     }

@@ -19,7 +19,7 @@ package no.sintef.fiskinfo.util
 
 import android.content.Context
 import android.location.Location
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import no.sintef.fiskinfo.model.fishingfacility.GeoJsonGeometry
 import no.sintef.fiskinfo.model.fishingfacility.GeometryType
 import java.text.SimpleDateFormat
@@ -40,8 +40,8 @@ fun formatTime(date: Date?):String {
     return stf.format(date)
 }
 
-val COORDINATE_FORMAT_DMS = "D_M_S"
-val COORDINATE_FORMAT_DDM = "D_DM"
+const val COORDINATE_FORMAT_DMS = "D_M_S"
+const val COORDINATE_FORMAT_DDM = "D_DM"
 
 val COORDINATE_FORMAT_MAP = mapOf(
     COORDINATE_FORMAT_DMS to Location.FORMAT_SECONDS,
@@ -54,12 +54,12 @@ fun formatLocation(location : Location, context: Context):String {
     val formatCodeStr = prefs.getString("coordinate_format", COORDINATE_FORMAT_DMS)
 
     if (formatCodeStr == COORDINATE_FORMAT_DDM) {
-        var ddm = DDMLocation.fromLocation(location)
+        val ddm = DDMLocation.fromLocation(location)
         val latStr = "${ddm.latitudeDegrees}\u00B0" + "%.4f".format(ddm.latitudeDecimalMinutes) + "\'${if (ddm.latitudeSouth) "S" else "N"}"
         val longStr = "${ddm.longitudeDegrees}\u00B0" + "%.4f".format(ddm.latitudeDecimalMinutes) + "\'${if (ddm.longitudeWest) "W" else "E"}"
         return "$latStr $longStr"
     } else {
-        var dms = DMSLocation.fromLocation(location)
+        val dms = DMSLocation.fromLocation(location)
         val latStr = "${dms.latitudeDegrees}\u00B0${dms.latitudeMinutes}\'" + "%.2f".format(dms.latitudeSeconds) + "\"${if (dms.latitudeSouth) "S" else "N"}"
         val longStr = "${dms.longitudeDegrees}\u00B0${dms.longitudeMinutes}\'" + "%.2f".format(dms.longitudeSeconds) + "\"${if (dms.longitudeWest) "W" else "E"}"
         return "$latStr $longStr"
@@ -77,34 +77,34 @@ fun formatLocation(location : Location, context: Context):String {
 // Geometry in WKT (WellKnownText) format. Coordinates in latlong (epsg:4326). Points and LineStrings are valid. Example linestring with two points LINESTRING(5.592542 62.573817,5.593198 62.574123) example: POINT(5.7348 62.320717)
 
 fun locationsToWTK(locations : List<Location>):String {
-    if (locations.size == 0) {
+    if (locations.isEmpty()) {
         return ""
     } else if (locations.size == 1) {
         return "POINT(${locations[0].longitude} ${locations[0].latitude})"
 //        return "POINT(${locations[0].latitude} ${locations[0].longitude})"
     } else {
-        var result : String = "LINESTRING("
+        var result = "LINESTRING("
         var first = true
-        locations.forEach( {
+        locations.forEach {
             if (!first)
                 result += ","
             result += it.longitude.toString() + " " + it.latitude.toString()
 //            result += it.latitude.toString() + " " + it.longitude.toString()
             first = false
-        })
+        }
         result += ")"
         return result
     }
 }
 
 fun wktToLocations(wkt : String?):List<Location> {
-    var result = ArrayList<Location>()
+    val result = ArrayList<Location>()
     if (wkt != null) {
         try {
-            var numString = wkt.substring( wkt.indexOf("(")+1, wkt.lastIndexOf(")"))
+            val numString = wkt.substring( wkt.indexOf("(")+1, wkt.lastIndexOf(")"))
 //                .replace("\\(", "")
 //                .replace("\\)", "")
-            var coordinateStrs = numString.split("[, ]".toRegex())
+            val coordinateStrs = numString.split("[, ]".toRegex())
             for (i in coordinateStrs.indices step 2) {
                 val loc = Location("")
                 loc.latitude = coordinateStrs[i].toDouble()
@@ -119,7 +119,7 @@ fun wktToLocations(wkt : String?):List<Location> {
 
 
 fun locationsToGeoJsonGeometry(locations : List<Location>): GeoJsonGeometry {
-    var retval: GeoJsonGeometry? = null
+    val retval: GeoJsonGeometry?
 
     if (locations.isEmpty()) {
         retval = GeoJsonGeometry(
@@ -148,9 +148,9 @@ fun locationsToGeoJsonGeometry(locations : List<Location>): GeoJsonGeometry {
 }
 
 fun geoJsonGeometryToLocations(geometry : GeoJsonGeometry):List<Location> {
-    var result = ArrayList<Location>()
+    val result = ArrayList<Location>()
     try {
-        if(GeometryType.POINT.value.equals(geometry.type)) {
+        if(GeometryType.POINT.value == geometry.type) {
             val location = Location("")
             location.latitude = geometry.coordinates[1] as Double
             location.longitude = geometry.coordinates[0] as Double
@@ -165,18 +165,6 @@ fun geoJsonGeometryToLocations(geometry : GeoJsonGeometry):List<Location> {
                 result.add(location)
             }
         }
-
-
-//        var numString = geometry.substring( geometry.indexOf("(")+1, geometry.lastIndexOf(")"))
-////                .replace("\\(", "")
-////                .replace("\\)", "")
-//        var coordinateStrs = numString.split("[, ]".toRegex())
-//        for (i in coordinateStrs.indices step 2) {
-//            val loc = Location("")
-//            loc.latitude = coordinateStrs[i].toDouble()
-//            loc.longitude = coordinateStrs[i+1].toDouble()
-//            result.add(loc)
-//        }
     } catch (e: Exception) {
     }
     return result

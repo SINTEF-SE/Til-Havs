@@ -19,13 +19,10 @@
 package no.sintef.fiskinfo.ui.tools
 
 import android.app.Application
-import android.content.Context
-import android.preference.PreferenceManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel;
-import no.sintef.fiskinfo.R
+import androidx.preference.PreferenceManager
 import no.sintef.fiskinfo.model.fishingfacility.*
 import no.sintef.fiskinfo.repository.FishingFacilityRepository
 import java.util.*
@@ -41,8 +38,7 @@ class ToolsViewModel(application: Application) : AndroidViewModel(application)  
     private val draftReport = MutableLiveData<Report>()
     private val selectedToolTypeCodeName = MutableLiveData<String>()
 
-    fun selectTool(tool: ToolViewModel?, isConfirmed: Boolean) {
-        //selectedIsIncomming.value = isConfirmed
+    fun selectTool(tool: ToolViewModel?) {
         selectedTool.value = tool
         selectedToolTypeCodeName.value = tool?.toolTypeCode?.getLocalizedName(getApplication())
     }
@@ -89,7 +85,7 @@ class ToolsViewModel(application: Application) : AndroidViewModel(application)  
     }
 
     fun setSelectedToolCode(code: ToolTypeCode) {
-        if ((selectedTool.value?.toolTypeCode != code) && (code != null)) {
+        if (selectedTool.value?.toolTypeCode != code) {
             selectedTool.value?.toolTypeCode != code
             selectedToolTypeCodeName.value = code.getLocalizedName(getApplication())
         }
@@ -101,7 +97,7 @@ class ToolsViewModel(application: Application) : AndroidViewModel(application)  
 
 
     fun setSelectedToolDate(date : Date) {
-        if ((date != null) && (selectedTool.value != null)) {
+        if (selectedTool.value != null) {
             // TODO: pick out only date part (not time)
             selectedTool.value!!.lastChangedDateTime = date
         }

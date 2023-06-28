@@ -24,10 +24,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import no.sintef.fiskinfo.databinding.LocationListItemBinding
-import no.sintef.fiskinfo.model.fishingfacility.FishingFacility
 import no.sintef.fiskinfo.util.formatLocation
 
-class LocationRecyclerViewAdapter(private val mListener: LocationRecyclerViewAdapter.OnLocationInteractionListener?) : RecyclerView.Adapter<LocationRecyclerViewAdapter.ViewHolder>() {
+class LocationRecyclerViewAdapter(private val mListener: OnLocationInteractionListener?) : RecyclerView.Adapter<LocationRecyclerViewAdapter.ViewHolder>() {
 
     var locations =  listOf<Location>()
         set(value) {
@@ -38,7 +37,7 @@ class LocationRecyclerViewAdapter(private val mListener: LocationRecyclerViewAda
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): LocationRecyclerViewAdapter.ViewHolder {
+    ): ViewHolder {
         return ViewHolder.from(parent)
     }
 
@@ -46,7 +45,7 @@ class LocationRecyclerViewAdapter(private val mListener: LocationRecyclerViewAda
         return locations.size
     }
 
-    override fun onBindViewHolder(holder: LocationRecyclerViewAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = locations[position]
         holder.bind(item)
         holder.binding.root
@@ -59,7 +58,6 @@ class LocationRecyclerViewAdapter(private val mListener: LocationRecyclerViewAda
 
         fun bind(item: Location) {
             binding.locationItemTextView.text = formatLocation(item, binding.root.context)
-            //binding.executePendingBindings()
         }
 
         companion object {
@@ -74,7 +72,6 @@ class LocationRecyclerViewAdapter(private val mListener: LocationRecyclerViewAda
 
     interface OnLocationInteractionListener {
         fun onEditLocationClicked(v: View, itemClicked : Int)
-        //fun onViewSnapInMapClicked(v: View, snap: SnapMessage?)
     }
 
 

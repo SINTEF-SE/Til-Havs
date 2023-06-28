@@ -18,7 +18,7 @@
 package no.sintef.fiskinfo.util
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import no.sintef.fiskinfo.R
 
 

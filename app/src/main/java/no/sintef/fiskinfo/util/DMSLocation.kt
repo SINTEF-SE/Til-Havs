@@ -33,6 +33,8 @@ data class DMSLocation(var latitudeSouth : Boolean = false,
                        var longitudeSeconds : Double = 0.0) {
 
     companion object {
+        const val EDIT_DMS_POSITION_FRAGMENT_RESULT_REQUEST_KEY = "GET_EDIT_POSITION_RESULTS"
+
         fun fromLocation(location : Location):DMSLocation {
             var dms = DMSLocation()
             with (dms) {

@@ -18,15 +18,15 @@
 package no.sintef.fiskinfo.repository
 
 import android.content.Context
-import android.preference.PreferenceManager
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.preference.PreferenceManager
 import no.sintef.fiskinfo.R
 
 import java.util.ArrayList
 
-import no.sintef.fiskinfo.api.SnapMessageService
+import no.sintef.fiskinfo.api.snapfish.SnapMessageService
 import no.sintef.fiskinfo.api.createService
 import no.sintef.fiskinfo.model.SnapMetadata
 import no.sintef.fiskinfo.model.SnapMessage
@@ -34,8 +34,6 @@ import no.sintef.fiskinfo.model.SnapMessageDraft
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class SnapRepository(context: Context) {
     internal var snapMessageService: SnapMessageService? = null
@@ -58,9 +56,8 @@ class SnapRepository(context: Context) {
         return inboxSnaps
     }
 
-    protected fun initService() {
-        snapMessageService =
-            createService(SnapMessageService::class.java,snapFishServerUrl!! )
+    private fun initService() {
+        snapMessageService = createService(SnapMessageService::class.java, snapFishServerUrl!!, true)
     }
 
 /*
@@ -98,7 +95,6 @@ class SnapRepository(context: Context) {
 
             }
         })
-//        (outboxSnaps!!.value!! as ArrayList<SnapMessage>).add(newSnap)
     }
 
     fun deleteInboxSnap(message: SnapMessage) {
@@ -132,7 +128,7 @@ class SnapRepository(context: Context) {
         if (snapMessageService == null)
             initService()
 
-        snapMessageService!!.getSnapMessages(snapFishUserId, true, true).enqueue(object : Callback<List<SnapMessage>> {
+        snapMessageService!!.getSnapMessages(snapFishUserId, inbox = true, snapmetadata = true).enqueue(object : Callback<List<SnapMessage>> {
             override fun onResponse(call: Call<List<SnapMessage>>, response: Response<List<SnapMessage>>) {
                 inboxSnaps.value = response.body()?.sortedByDescending {it.sentTimestamp} ?: ArrayList()
             }
@@ -175,10 +171,7 @@ class SnapRepository(context: Context) {
     companion object {
         var instance: SnapRepository? = null
 
-        //    final static String SNAP_FISH_SERVER_URL = "https://10.218.86.229:44387/";
-        //    final static String SNAP_FISH_SERVER_URL = "http://10.218.69.173:58196/";
-        // internal val DEFAULT_SNAP_FISH_SERVER_URL = "http://10.218.86.229:5002/"
-        internal val DEFAULT_SNAP_FISH_SERVER_URL = "http://129.242.16.123:37789/"
+        internal const val DEFAULT_SNAP_FISH_SERVER_URL = "http://129.242.16.123:37789/"
         fun getInstance(context: Context): SnapRepository {
             if (instance == null)
                 instance = SnapRepository(context)

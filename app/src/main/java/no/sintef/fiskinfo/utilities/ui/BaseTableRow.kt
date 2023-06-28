@@ -41,7 +41,7 @@ abstract class BaseTableRow(context: Context?, layoutId: Int) {
     }
 
     protected val context: Context
-        protected get() = view.context
+        get() = view.context
 
     abstract fun setEnabled(enabled: Boolean)
 

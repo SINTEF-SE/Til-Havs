@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.sintef.fiskinfo.api
+package no.sintef.fiskinfo.api.barentswatch
 
 import no.sintef.fiskinfo.model.Token
 import retrofit2.Call

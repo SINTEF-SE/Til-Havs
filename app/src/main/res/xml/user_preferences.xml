@@ -68,7 +68,6 @@
             android:title="@string/prefs_days_before_old" />
     </PreferenceCategory>
 
-
     <PreferenceCategory android:title="@string/prefs_category_snapfish" android:icon="@drawable/ic_snap">
         <SwitchPreferenceCompat
             android:key="@string/pref_snap_enable_service"
@@ -111,15 +110,45 @@
     </PreferenceCategory>
 
 
+    <PreferenceCategory android:title="@string/prefs_category_sprice" android:icon="@drawable/ic_icing_24">
+        <SwitchPreferenceCompat
+            android:key="@string/pref_sprice_enable_service_key"
+            android:title="@string/prefs_sprice_enable_sprice"/>
+
+        <EditTextPreference
+            android:key="@string/pref_sprice_username_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/prefs_sprice_username" />
+
+        <EditTextPreference
+            android:key="@string/pref_sprice_password_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="textPassword"
+            android:title="@string/prefs_sprice_password"
+            />
+
+        <EditTextPreference
+            android:key="@string/pref_sprice_call_sign_key"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/prefs_sprice_vessel_call_sign"
+            />
+    </PreferenceCategory>
+
     <PreferenceCategory
             android:icon="@drawable/ic_settings"
             android:title="@string/prefs_other_settings">
 
         <Preference
-                android:key="consent"
-                android:summary="@string/prefs_conditions_for_use_summary"
-                android:title="@string/prefs_conditions_for_use"></Preference>
+            android:key="consent"
+            android:summary="@string/prefs_conditions_for_use_summary"
+            android:title="@string/prefs_conditions_for_use" />
     </PreferenceCategory>
 
-    
+
 </androidx.preference.PreferenceScreen>

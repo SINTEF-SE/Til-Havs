@@ -17,8 +17,6 @@
  */
 package no.sintef.fiskinfo.api
 
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.logEvent
 import com.google.gson.*
 import java9.util.concurrent.CompletableFuture
 import net.openid.appauth.AuthState
@@ -36,13 +34,23 @@ import java.util.*
 /**
  * Create a REST service without authentication
  */
-fun <S> createService(serviceClass : Class<S>, baseUrl : String) : S {
+fun <S> createService(serviceClass : Class<S>, baseUrl : String, addJSONHeaderInterceptor: Boolean, additionalInterceptors: List<Interceptor> = listOf()) : S {
     val client =  OkHttpClient.Builder()
-        .addInterceptor(JSONHeaderInterceptor("FiskInfo/2.0 (Android)"))
-        .build()
+        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+
+    if(addJSONHeaderInterceptor) {
+        client.addInterceptor(JSONHeaderInterceptor("FiskInfo/2.0 (Android)"))
+    }
+
+    if(additionalInterceptors.isNotEmpty()) {
+       additionalInterceptors.forEach {
+           client.addInterceptor(it)
+       }
+    }
+
     // TODO: Consider how to handle field name policy. At the moment this function is used
     // by snapfish, while the authorization service one is used by BW services
-    return createService(serviceClass, baseUrl, client, FieldNamingPolicy.UPPER_CAMEL_CASE)
+    return createService(serviceClass, baseUrl, client.build(), FieldNamingPolicy.UPPER_CAMEL_CASE)
 }
 
 /**
@@ -61,7 +69,7 @@ fun <S> createService(serviceClass: Class<S>, baseUrl : String, authToken : Stri
  */
 fun <S> createService(serviceClass: Class<S>, baseUrl : String, authService: AuthorizationService, authState: AuthState) : S {
     val in2 = HttpLoggingInterceptor()
-    in2.setLevel(HttpLoggingInterceptor.Level.BODY)
+    in2.level = HttpLoggingInterceptor.Level.BODY
 
     if(authState.accessToken == null) {
 
@@ -76,7 +84,6 @@ fun <S> createService(serviceClass: Class<S>, baseUrl : String, authService: Aut
 
     return createService(serviceClass, baseUrl, client, FieldNamingPolicy.IDENTITY)
 }
-
 
 private fun <S> createService(serviceClass: Class<S>, baseUrl : String, client : OkHttpClient, namingPolicy: FieldNamingPolicy) : S {
     val gson = GsonBuilder()
@@ -97,7 +104,6 @@ private fun <S> createService(serviceClass: Class<S>, baseUrl : String, client :
     return retrofit.create(serviceClass)
 }
 
-
 class DateTypeDeserializer : JsonDeserializer<Date> {
     @Throws(JsonParseException::class)
     override fun deserialize(
@@ -107,12 +113,12 @@ class DateTypeDeserializer : JsonDeserializer<Date> {
     ): Date {
         for (format in DATE_FORMATS) {
             try {
-                return SimpleDateFormat(format).parse(jsonElement.asString) //SimpleDateFormat(format, Locale.US).parse(jsonElement.asString)
+                return SimpleDateFormat(format).parse(jsonElement.asString)!! //SimpleDateFormat(format, Locale.US).parse(jsonElement.asString)
             } catch (e: ParseException) {
             }
         }
         throw JsonParseException(
-            "Unparseable date: \"" + jsonElement.asString
+            "Unparsable date: \"" + jsonElement.asString
                     + "\". Supported formats: \n" + Arrays.toString(DATE_FORMATS)
         )
     }
@@ -127,14 +133,13 @@ class DateTypeDeserializer : JsonDeserializer<Date> {
     }
 }
 
-
 private class JSONHeaderInterceptor(private val userAgent : String = ""):
     Interceptor {
 
-    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+    override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         request = request.newBuilder()
-            .header("User-Agent", "$userAgent")
+            .header("User-Agent", userAgent)
             .header("Accept", "application/json")
             .build()
 
@@ -142,31 +147,23 @@ private class JSONHeaderInterceptor(private val userAgent : String = ""):
     }
 }
 
-
-
 // TODO: Figure out what parameters are needed in new API for Authorization
 // TODO: Figure out if the call can be done without involving futures
 // TODO: Test call on a simple API call
-
-
 private class OIDCAuthenticator(private val authService: AuthorizationService, private val authState: AuthState, private val userAgent : String = "") :
     Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
         val future = CompletableFuture<Request?>()
 
-        authState.performActionWithFreshTokens(authService) { accessToken, _, ex ->
-            if (ex != null) {
-                //Log.e("AppAuthAuthenticator", "Failed to authorize = $ex")
-            }
-
+        authState.performActionWithFreshTokens(authService) { accessToken, _, _ ->
             if (response.request().header("Authorization") != null) {
                 future.complete(null) // Give up, we've already failed to authenticate.
             }
 
             val response = response.request().newBuilder()
                 .header("Authorization", "bearer $accessToken")
-                .header("User-Agent", "$userAgent")
+                .header("User-Agent", userAgent)
                 .build()
 
             future.complete(response)
@@ -177,16 +174,14 @@ private class OIDCAuthenticator(private val authService: AuthorizationService, p
 
 }
 
-
-
 private class OAuthInterceptor(private val tokenType: String, private val accessToken: String, private val userAgent : String = ""):
     Interceptor {
 
-    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+    override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
         request = request.newBuilder()
             .header("Authorization", "$tokenType $accessToken")
-            .header("User-Agent", "$userAgent")
+            .header("User-Agent", userAgent)
             .build()
 
         return chain.proceed(request)

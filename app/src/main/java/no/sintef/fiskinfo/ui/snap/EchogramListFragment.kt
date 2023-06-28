@@ -17,27 +17,22 @@
  */
 package no.sintef.fiskinfo.ui.snap
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.EchogramListFragmentBinding
 import no.sintef.fiskinfo.model.SnapMetadata
-import no.sintef.fiskinfo.repository.SnapRepository
 
 /**
  * A fragment showing a list of Echograms.
@@ -55,42 +50,49 @@ class EchogramListFragment : Fragment(), EchogramRecyclerViewAdapter.OnEchogramI
     private var mAdapter: EchogramRecyclerViewAdapter? = null
     private var mSwipeLayout: SwipeRefreshLayout? = null
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mSnapViewModel = ViewModelProviders.of(requireActivity()).get(SnapViewModel::class.java)
-        mEchogramViewModel = ViewModelProviders.of(requireActivity()).get(EchogramViewModel::class.java)
-        mEchogramViewModel!!.getEchogramInfos()!!.observe(viewLifecycleOwner,
-            Observer { echogramInfos ->
-                mAdapter!!.setEchograms(echogramInfos)
-                if (mSwipeLayout != null)
-                    mSwipeLayout!!.isRefreshing = false
-            })
-    }
+    private var _binding: EchogramListFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.echogram_list_fragment, container, false)
+    ): View {
+        _binding = EchogramListFragmentBinding.inflate(inflater, container, false)
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.echogram_list)
-
-        val context = view.context
+        val recyclerView = binding.echogramList
+        val context = binding.root.context
         recyclerView.layoutManager = LinearLayoutManager(context)
         mAdapter = EchogramRecyclerViewAdapter(this)
         recyclerView.adapter = mAdapter
 
-        mSwipeLayout = view.findViewById<View>(R.id.echogramlistswipelayout) as SwipeRefreshLayout
+        mSwipeLayout = binding.root.findViewById<View>(R.id.echogramlistswipelayout) as SwipeRefreshLayout
 
         mSwipeLayout!!.setOnRefreshListener { mEchogramViewModel!!.refreshEchogramListContent() }
 
-        return view
+        mSnapViewModel = ViewModelProvider(requireActivity()).get(SnapViewModel::class.java)
+        mEchogramViewModel = ViewModelProvider(requireActivity()).get(EchogramViewModel::class.java)
+        mEchogramViewModel!!.getEchogramInfos()!!.observe(viewLifecycleOwner
+        ) { echogramInfos ->
+            mAdapter!!.setEchograms(echogramInfos)
+            if (mSwipeLayout != null)
+                mSwipeLayout!!.isRefreshing = false
+        }
+
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewEchogramClicked(v: View, echogram: SnapMetadata?) {
         if (echogram?.snapId != null) {
-            var snapId = echogram.snapId.toString()
-            var bundle = bundleOf(EchogramViewerFragment.ARG_SNAP_ID to snapId)
+            val snapId = echogram.snapId.toString()
+            val bundle = bundleOf(EchogramViewerFragment.ARG_SNAP_ID to snapId)
             v.findNavController().navigate(R.id.action_fragment_snap_to_echogram_viewer_fragment, bundle)
         }
     }

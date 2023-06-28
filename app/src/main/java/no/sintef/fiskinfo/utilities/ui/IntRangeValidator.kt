@@ -21,7 +21,7 @@ import android.widget.TextView
 import no.sintef.fiskinfo.R
 
 class IntRangeValidator(
-    private val textView: TextView,
+    textView: TextView,
     private val low: Int,
     private val includeLow: Boolean,
     private val high: Int,
@@ -29,7 +29,7 @@ class IntRangeValidator(
     private val updateAction: (Double) -> (Unit)
 ) : TextValidator(textView) {
     override fun validateAndUpdate(textView: TextView?, text: String?):Boolean {
-        var num = 0.0;
+        val num: Double;
 
         try {
             // TODO: Consider locale adapted parsing
@@ -38,12 +38,10 @@ class IntRangeValidator(
             val withinHigh = if (includeHigh) num <= high else num < high
 
             if (! (withinHigh && withinLow))
-                textView?.error = textView?.context?.getString(R.string.util_value_must_be_in_range) + low +
-                        textView?.context?.getString(R.string.util_range_to_separator) + high
+                textView?.error = "${textView?.context?.getString(R.string.util_value_must_be_in_range)} ${low}-${high}"
             else {
                 textView?.error = null
-                if (updateAction != null)
-                    updateAction(num)
+                updateAction(num)
             }
         } catch (nfe: NumberFormatException) {
             textView?.error = textView?.context?.getString(R.string.util_value_must_be_in_range) + low +

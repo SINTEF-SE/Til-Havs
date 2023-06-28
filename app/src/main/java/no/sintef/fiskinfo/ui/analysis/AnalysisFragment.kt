@@ -18,7 +18,6 @@
 package no.sintef.fiskinfo.ui.analysis
 
 import android.net.http.SslError
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -28,10 +27,12 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.AnalysisFragmentBinding
 
 class AnalysisFragment : Fragment() {
 
@@ -43,21 +44,29 @@ class AnalysisFragment : Fragment() {
     private lateinit var viewModel: AnalysisViewModel
     private lateinit var webView: WebView
 
+    private var _binding: AnalysisFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
-        return inflater.inflate(R.layout.analysis_fragment, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(AnalysisViewModel::class.java)
+    ): View {
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext())
+        _binding = AnalysisFragmentBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this).get(AnalysisViewModel::class.java)
         configureWebView()
+
+        return binding.root
     }
 
-    fun configureWebView() {
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun configureWebView() {
         if (getView() == null) return
         webView = requireView().findViewById(R.id.analysis_fragment_web_view)
         with (webView.settings) {

@@ -18,13 +18,10 @@ package no.sintef.fiskinfo.ui.snap
  * limitations under the License.
  */
 
+import android.annotation.SuppressLint
 import android.net.http.SslError
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 
 import android.view.LayoutInflater
@@ -35,14 +32,17 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 
 import no.sintef.fiskinfo.R
+import no.sintef.fiskinfo.databinding.SnapDetailFragmentBinding
 
 class SnapDetailFragment : Fragment() {
 
     private lateinit var mViewModel: SnapViewModel
-    private var _mBinding: no.sintef.fiskinfo.databinding.SnapDetailFragmentBinding? = null
+    private var _mBinding: SnapDetailFragmentBinding? = null
 
     private val mBinding get() = _mBinding!! // Only valid between onCreateView and onDestroyView.
 
@@ -50,30 +50,27 @@ class SnapDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _mBinding = DataBindingUtil.inflate(inflater, R.layout.snap_detail_fragment, container, false)
-        return mBinding.getRoot()
-    }
+    ): View {
+        _mBinding = SnapDetailFragmentBinding.inflate(inflater, container, false)
 
-    // Changed from ViewDataBinding to SnapDetailFragmentBinding above
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProviders.of(requireActivity()).get(SnapViewModel::class.java)
+        mViewModel = ViewModelProvider(requireActivity())[SnapViewModel::class.java]
         configureWebView()
-        mViewModel.getSelectedSnap().observe(viewLifecycleOwner, Observer { snap ->
-            mBinding.setSnap(snap)
-            mBinding.setSnapMetadata(snap?.snapMetadata)
-            mBinding.setIncomming(mViewModel!!.isIncomming().value)
-            mBinding.setHandlers(this@SnapDetailFragment)
+        mViewModel.getSelectedSnap().observe(viewLifecycleOwner) { snap ->
+            mBinding.snap = snap
+            mBinding.snapMetadata = snap?.snapMetadata
+            mBinding.incomming = mViewModel.isIncomming().value
+            mBinding.handlers = this@SnapDetailFragment
             loadContent(snap?.snapMetadata?.snapId.toString())
-        })
+        }
+
+        return mBinding.root
     }
 
     private lateinit var webView: WebView
 
-    fun configureWebView() {
-        if (getView() == null) return
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun configureWebView() {
+        if (view == null) return
         webView = requireView().findViewById(R.id.snapdetail_web_view)
         with (webView.settings) {
             javaScriptEnabled = true
@@ -84,7 +81,8 @@ class SnapDetailFragment : Fragment() {
             //setUseWideViewPort(true)
             //setLoadWithOverviewMode(true)
         }
-        webView!!.webViewClient = object : WebViewClient() {
+        webView.webViewClient = object : WebViewClient() {
+            @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String): Boolean {
                 view?.loadUrl(url)
                 return true
@@ -96,14 +94,12 @@ class SnapDetailFragment : Fragment() {
 
     }
 
-    val DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS = "https://129.242.16.123:37457/"
+    @Suppress("PrivatePropertyName")
+    private val DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS = "https://129.242.16.123:37457/"
 
-    fun loadContent(snapId : String) {
+    private fun loadContent(snapId : String) {
         try {
-            if (snapId == null)
-                return
-
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val prefs = getDefaultSharedPreferences(requireContext())
             val snapFishServerUrl = prefs.getString(getString(R.string.pref_snap_web_server_address), DEFAULT_SNAP_FISH_WEB_SERVER_ADDRESS)
             if (snapFishServerUrl != null) {
                 val url = snapFishServerUrl + "snap/" + snapId
@@ -115,27 +111,24 @@ class SnapDetailFragment : Fragment() {
 
     }
 
-
-
+    fun onViewInMapClicked(@Suppress("UNUSED_PARAMETER") v: View) {
+        val toast = Toast.makeText(this.context, "Not yet implemented!", Toast.LENGTH_SHORT)
+        toast.show()
+    }
 
     fun onViewEchogramHereClicked(v: View) {
         try {
-            if (! (mViewModel.getSelectedSnap()?.value?.snapMetadata?.snapId != null))
+            if (mViewModel.getSelectedSnap().value?.snapMetadata?.snapId == null)
                 return
-            var snapId = mViewModel.getSelectedSnap()?.value?.snapMetadata?.snapId.toString()
-            var bundle = bundleOf(EchogramViewerFragment.ARG_SNAP_ID to snapId)
+            val snapId = mViewModel.getSelectedSnap().value?.snapMetadata?.snapId.toString()
+            val bundle = bundleOf(EchogramViewerFragment.ARG_SNAP_ID to snapId)
             v.findNavController().navigate(R.id.action_snapDetailFragment_to_echogramViewerFragment, bundle)
         } catch (ex: Exception) {
         }
 
     }
 
-    fun onViewInMapClicked(v: View) {
-        val toast = Toast.makeText(this.context, "Not yet implemented!", Toast.LENGTH_SHORT)
-        toast.show()
-    }
-
-    fun onViewInEchosounderClicked(v: View) {
+    fun onViewInMapClicked() {
         val toast = Toast.makeText(this.context, "Not yet implemented!", Toast.LENGTH_SHORT)
         toast.show()
     }

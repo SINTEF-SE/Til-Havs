@@ -21,6 +21,10 @@
             android:id="@id/fragment_analysis"
             android:icon="@drawable/ic_chart"
             android:title="@string/catch_analysis_title" />
+        <item
+            android:id="@id/fragment_sprice"
+            android:icon="@drawable/ic_icing_24"
+            android:title="@string/sprice_menu_title" />
 
     </group>
     <item

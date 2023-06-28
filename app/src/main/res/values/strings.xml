@@ -15,6 +15,9 @@
     <string name="update">Update</string>
     <string name="no_internet_access">No internet access</string>
 
+    <string name="util_storage_settings_disabled">Storage access</string>
+    <string name="util_storage_enable_question">Til Havs needs access to device storage in order to upload images. Do you want to grant this access?</string>
+
     <string name="user_profile_title">Vessels and profile</string>
     <string name="preferences_title">Preferences</string>
     <string name="tools_title">Tools</string>
@@ -23,6 +26,7 @@
     <string name="proto_close_drawer">Close drawer</string>
     <string name="snap_title">SnapFish demo</string>
     <string name="catch_analysis_title">Catch Analysis</string>
+    <string name="sprice_menu_title" translatable="false">SPRICE</string>
     <string name="map_title">Map</string>
 
     <!-- User preferences strings -->
@@ -43,6 +47,11 @@
     <string name="pref_tool_count" translatable="false">pref_tool_count</string>
 
     <string name="pref_map_selected_layers" translatable="false">pref_map_selected_layers</string>
+
+    <string name="pref_sprice_enable_service_key" translatable="false">pref_sprice_enable_service_key</string>
+    <string name="pref_sprice_username_key" translatable="false">pref_sprice_username_key</string>
+    <string name="pref_sprice_password_key" translatable="false">pref_sprice_password_key</string>
+    <string name="pref_sprice_call_sign_key" translatable="false">pref_sprice_call_sign_key</string>
 
 
     <!-- Map fragment string -->
@@ -87,7 +96,8 @@
     <string name="tool_type_code_unknown">Unknown tool</string>
 
     <!-- Position / location -->
-    <string name="position">Positions</string>
+    <string name="positions">Positions</string>
+    <string name="position">Position</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <!--<string name="coordinates_help_text">Koordinater skrives inn som grader, minutt, sekund. Du kan legge til og fjerne posisjoner med knappene til høyre.</string>-->
@@ -102,6 +112,9 @@
     <string name="cardinal_direction_symbol_south">S</string>
     <string name="cardinal_direction_symbol_west">W</string>
     <string name="cardinal_direction_symbol_east">E</string>
+    <string name="get_current_position_button_description">Get gps position</string>
+    <string name="add_position_button_description">Add additional position</string>
+    <string name="remove_position_button_description">Remove last position</string>
 
     <string name="tool_deployment_sent">Tool deployment sent!</string>
     <string name="tool_deployment_error">\"Tool deployment error: \"</string>
@@ -112,8 +125,8 @@
     <string name="tool_report_retrieval_message">Please enter a comment if the tool is lost or if the retrieval was overdue</string>
     <string name="tool_report_retrieval_message_confirm">Are you sure you want to report this tool as retrieved?</string>
     <string name="util_gps_settings_disabled">Gps Disabled</string>
-    <string name="util_gps_enable_question">gps is not enabled . do you want to enable ?</string>
-    <string name="util_value_must_be_in_range">\"Value must be in range \"</string>
+    <string name="util_gps_enable_question">gps is not enabled . do you want to enable?</string>
+    <string name="util_value_must_be_in_range">Value must be in range </string>
     <string name="util_range_to_separator">\" to \"</string>
     <string name="echogram_snap_title_or_other_main_aspect" translatable="false">Snap title or other main aspect</string>
     <string name="echogram_date_and_time_or_other_first_detail" translatable="false">Date and time or other first detail</string>
@@ -151,6 +164,7 @@
     <string name="fragment_title_tool_details">Tool Details</string>
     <string name="fragment_title_overview">Til Havs Overview</string>
     <string name="fragment_title_snapfish">SnapFish</string>
+    <string name="fragment_title_sprice" translatable="false">SPRICE</string>
     <string name="fragment_title_user_profile">User Profile</string>
     <string name="fragment_title_user_preferences">Preferences</string>
     <string name="fragment_title_snap_editor">New Snap Message</string>
@@ -162,6 +176,150 @@
     <string name="fragment_title_consent">Consent to terms of use</string>
     <string name="tool_setup_date">Setup date</string>
 
+    // SPRICE and icing
+    <string name="icing_type_code_light_icing">Light icing (0,05 – 0.5 cm/h)</string>
+    <string name="icing_type_code_moderate_icing">Light icing (0,5 – 1.34 cm/h)</string>
+    <string name="icing_type_code_heavy_icing">Heavy icing (over 1.34 cm/h)</string>
+
+    <string name="wind_type_code_light_wind">Light wind (0 – 3 m/s)</string>
+    <string name="wind_type_code_moderate_wind">Light wind (3 – 7 m/s)</string>
+    <string name="wind_type_code_heavy_wind">Heavy wind (over 7 m/s)</string>
+
+    <string name="enum_not_selected">Not selected</string>
+
+    <string name="max_middle_wind_time_0">0: during observation</string>
+    <string name="max_middle_wind_time_1">1: 0–1 hour from obs</string>
+    <string name="max_middle_wind_time_2">2: 1–2 hours from obs</string>
+    <string name="max_middle_wind_time_3">3: 2–3 hours from obs</string>
+    <string name="max_middle_wind_time_4">4: 3–6 hours from obs</string>
+    <string name="max_middle_wind_time_5">5: 6–9 hours from obs</string>
+    <string name="max_middle_wind_time_6">6: 9–12 hours from obs</string>
+    <string name="max_middle_wind_time_7">7: Wind seems to dissipate</string>
+    <string name="max_middle_wind_time_8">8: Wind seems unchanged</string>
+    <string name="max_middle_wind_time_9">9: Wind seems to increase</string>
+    <string name="max_middle_wind_time_x">X: Impossible to say</string>
+    
+    <string name="change_in_vessel_icing_0">Ice that does not build up</string>
+    <string name="change_in_vessel_icing_1">Ice that builds up slowly</string>
+    <string name="change_in_vessel_icing_2">Ice that builds up quickly</string>
+    <string name="change_in_vessel_icing_3">Ice that melts or breaks up slowly</string>
+    <string name="change_in_vessel_icing_4">Ice that melts or breaks up quickly</string>
+
+    <string name="degree_of_icing_0">No icing</string>
+    <string name="degree_of_icing_1">light icing</string>
+    <string name="degree_of_icing_2">Moderate icing</string>
+    <string name="degree_of_icing_3">Heavy icing</string>
+
+    <string name="concentration_of_sea_ice_0">No sea ice in sight</string>
+    <string name="concentration_of_sea_ice_1">Ship in open lead further than 1 NM</string>
+    <string name="concentration_of_sea_ice_2">Open pack ice, with water in between</string>
+    <string name="concentration_of_sea_ice_3">4 to 6 10 parts open pack of ice</string>
+    <string name="concentration_of_sea_ice_4">7 and 8 10 parts closed pack ice</string>
+    <string name="concentration_of_sea_ice_5">9/10 cover of dense pack ice</string>
+    <string name="concentration_of_sea_ice_6">Areas of pack ice with lighter pack ice in between</string>
+    <string name="concentration_of_sea_ice_7">Areas of pack ice with dense pack ice</string>
+    <string name="concentration_of_sea_ice_8">Fast ice with open water</string>
+    <string name="concentration_of_sea_ice_9">Fast ice with dense pack ice</string>
+    <string name="concentration_of_sea_ice_10">Not possible to report</string>
+
+    <string name="direction_to_nearest_sea_ice_edge_0">Just fresh ice</string>
+    <string name="direction_to_nearest_sea_ice_edge_1">Thin ice below 10 cm</string>
+    <string name="direction_to_nearest_sea_ice_edge_2">Young ice</string>
+    <string name="direction_to_nearest_sea_ice_edge_3">New/young ice with some first-year ice</string>
+    <string name="direction_to_nearest_sea_ice_edge_4">Thin first-year ice with some new ice</string>
+    <string name="direction_to_nearest_sea_ice_edge_5">First year\'s ice 30–70 cm</string>
+    <string name="direction_to_nearest_sea_ice_edge_6">First year\'s ice 70–120 cm</string>
+    <string name="direction_to_nearest_sea_ice_edge_7">Catch first year\'s ice > 120cm</string>
+    <string name="direction_to_nearest_sea_ice_edge_8">Medium and thick first-year ice with some old ice > 200cm</string>
+    <string name="direction_to_nearest_sea_ice_edge_9">Mostly old ice</string>
+    <string name="direction_to_nearest_sea_ice_edge_x">Unable to report</string>
+
+    <string name="reason_for_icing_on_vessel_or_platform_1">Only sea spray</string>
+    <string name="reason_for_icing_on_vessel_or_platform_2">Only snow/sleet</string>
+    <string name="reason_for_icing_on_vessel_or_platform_3">Sea spray and snow/sleet in combination</string>
+    <string name="reason_for_icing_on_vessel_or_platform_4">Just fog</string>
+    <string name="reason_for_icing_on_vessel_or_platform_5">Fog and sea spray in combination</string>
+    <string name="reason_for_icing_on_vessel_or_platform_6">Freezing rain</string>
+    <string name="reason_for_icing_on_vessel_or_platform_7">Subcooled rain and sea spray in combination</string>
+
+    <string name="sea_ice_conditions_and_development_0">Ships in open water</string>
+    <string name="sea_ice_conditions_and_development_1">Ships in easily penetrable ice; Conditions are improving</string>
+    <string name="sea_ice_conditions_and_development_2">Ships in easily penetrable ice; Conditions are stable</string>
+    <string name="sea_ice_conditions_and_development_3">Ships in easily penetrable ice; Conditions are getting worse</string>
+    <string name="sea_ice_conditions_and_development_4">Ships in difficult permeable ice; Conditions are improving</string>
+    <string name="sea_ice_conditions_and_development_6">Ice forms and condenses. Difficult conditions that worsen</string>
+    <string name="sea_ice_conditions_and_development_7">Ice under light pressure. Difficult conditions that worsen</string>
+    <string name="sea_ice_conditions_and_development_8">Ice under tight pressure. Difficult conditions that worsen</string>
+    <string name="sea_ice_conditions_and_development_9">Ship stuck in ice</string>
+    <string name="sea_ice_conditions_and_development_x">Unable to report</string>
+
+    <string name="max_middle_wind_time_not_selected" translatable="false"/>
+    <string name="sprice_icing_reporting_hour_00" translatable="false">00:00</string>
+    <string name="sprice_icing_reporting_hour_01" translatable="false">01:00</string>
+    <string name="sprice_icing_reporting_hour_02" translatable="false">02:00</string>
+    <string name="sprice_icing_reporting_hour_03" translatable="false">03:00</string>
+    <string name="sprice_icing_reporting_hour_04" translatable="false">04:00</string>
+    <string name="sprice_icing_reporting_hour_05" translatable="false">05:00</string>
+    <string name="sprice_icing_reporting_hour_06" translatable="false">06:00</string>
+    <string name="sprice_icing_reporting_hour_07" translatable="false">07:00</string>
+    <string name="sprice_icing_reporting_hour_08" translatable="false">08:00</string>
+    <string name="sprice_icing_reporting_hour_09" translatable="false">09:00</string>
+    <string name="sprice_icing_reporting_hour_10" translatable="false">10:00</string>
+    <string name="sprice_icing_reporting_hour_11" translatable="false">11:00</string>
+    <string name="sprice_icing_reporting_hour_12" translatable="false">12:00</string>
+    <string name="sprice_icing_reporting_hour_13" translatable="false">13:00</string>
+    <string name="sprice_icing_reporting_hour_14" translatable="false">14:00</string>
+    <string name="sprice_icing_reporting_hour_15" translatable="false">15:00</string>
+    <string name="sprice_icing_reporting_hour_16" translatable="false">16:00</string>
+    <string name="sprice_icing_reporting_hour_17" translatable="false">17:00</string>
+    <string name="sprice_icing_reporting_hour_18" translatable="false">18:00</string>
+    <string name="sprice_icing_reporting_hour_19" translatable="false">19:00</string>
+    <string name="sprice_icing_reporting_hour_20" translatable="false">20:00</string>
+    <string name="sprice_icing_reporting_hour_21" translatable="false">21:00</string>
+    <string name="sprice_icing_reporting_hour_22" translatable="false">22:00</string>
+    <string name="sprice_icing_reporting_hour_23" translatable="false">23:00</string>
+
+    <string name="sprice_icing_reporting_observation_hour">Observation time</string>
+    <string name="sprice_icing_reporting_synop">Synop</string>
+
+    <string name="max_middle_wind_when_hint">When Max middle wind</string>
+    <string name="icing_icing_type">Icing type</string>
+    <string name="icing_wind_type">Wind type</string>
+    <string name="icing_report_date">Date</string>
+    <string name="icing_report_time">Time</string>
+    <string name="icing_report_air_temperature_hint">Air temperature ℃</string>
+    <string name="icing_report_sea_temperature_hint">Sea temperature ℃</string>
+    <string name="icing_report_temperature_unit_suffix" translatable="false">℃</string>
+    <string name="icing_report_vessel_icing_thickness_hint">Ice thickness</string>
+    <string name="icing_report_vessel_icing_thickness_suffix">cm</string>
+    <string name="icing_report_vessel_reason_for_icing_hint">Reason for icing</string>
+    <string name="icing_report_vessel_change_in_icing">Change in icing</string>
+    <string name="icing_report_sea_ice_conditions_and_development_hint">Sea ice conditions and development</string>
+    <string name="icing_report_vessel_degree_of_icing">Degree of icing</string>
+
+    <string name="report_icing_category_header_vessel_icing">Ice on the vessel\'s hull</string>
+    <string name="report_icing_category_header_temperature">Temperature</string>
+    <string name="report_icing_category_header_observation_time">Observation time</string>
+    <string name="report_icing_category_header_wind_observations">Wind observations</string>
+    <string name="report_icing_category_header_position">Position</string>
+    <string name="report_icing_category_header_sea_icing">Sea Ice</string>
+
+    <string name="icing_report_check_error">Icing report error</string>
+    <string name="icing_report_submit_error">Icing report error</string>
+    <string name="icing_report_sent">Icing report sent</string>
+    <string name="icing_missing_value">Required value</string>
+
+    <string name="fragment_title_icing">Icing</string>
+    <string name="fragment_title_report_icing">Report icing</string>
+
+    <string name="orap_icing_action_check_message" translatable="false">Kontroller melding</string>
+    <string name="orap_icing_action_send_message_to_met" translatable="false">Send melding til met.no</string>
+
+    <string name="report_icing_select_images_title">Add images</string>
+
+
+    <string name="drop_down_menu_error_not_selected">No value chosen</string>
+    <string name="drop_down_menu_error_not_selected_for_template_string">No value chosen for %1$s</string>
 
     // Overview fragment resources
     <string name="overview_card_map_title">Map</string>
@@ -178,6 +336,10 @@
     <string name="overview_card_analysis_subtitle">View and analyse catch history</string>
     <string name="overview_card_analysis_description">Data are updated daily.</string>
     <string name="overview_card_analysis_view_analysis">View catch analysis</string>
+
+    <string name="overview_card_icing_title">Icing</string>
+    <string name="overview_card_icing_subtitle">View icing details</string>
+    <string name="overview_card_view_icing_details">View icing</string>
 
     <string name="overview_card_tools_description">You have %1$d confirmed and %2$d unconfirmed tools.</string>
     <string name="overview_card_tools_overdue_description">%d tools are overdue for hauling.</string>
@@ -266,21 +428,11 @@
     <string name="prefs_category_snapfish">SnapFish demo settings</string>
     <string name="prefs_days_before_old">Days deployed limit</string>
 
-    <!--
-    <string name="error_invalid_email">Ugyldig epostadresse</string>
-    <string name="error_invalid_password">Passordet er for kort</string>
-    <string name="error_incorrect_password">Feil passord</string>
-    <string name="error_account_creation_failed">Oppretting av ny bruker feilet</string>
-    <string name="error_password_reset_failed">Gjenoppretting av passordet feilet</string>
-    <string name="title_activity_my_page">MyPageActivity</string>
-    <string name="title_activity_map">MapActivity</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="log_out">Logg ut</string>
-    <string name="confirm_log_out">Er du sikker på at du vil logge ut?</string>
-    <string name="title_activity_file_dialog">FileDialog</string>
-    <string name="register_user_account_hyperlink">&lt;a href="https://www.barentswatch.no/LandingPage/"&gt;Registrer bruker.&lt;/a&gt;</string>
-    <string name="forgot_account_password_hyperlink">&lt;a href="https://www.barentswatch.no/s/Logg-inn/?ReturnUrl=/MinSide/"&gt;Glemt passord.&lt;/a&gt;</string>
-    -->
-
-
+    <string name="prefs_category_sprice">SPRICE settings</string>
+    <string name="prefs_sprice_enable_sprice">Activate SPRICE</string>
+    <string name="prefs_sprice_username">Orap username</string>
+    <string name="prefs_sprice_password">Orap password</string>
+    <string name="prefs_sprice_vessel_call_sign">vessel call sign</string>
+    <string name="report_icing_menu_option_send">Report</string>
+    <string name="report_icing_menu_option_check">Check</string>
 </resources>

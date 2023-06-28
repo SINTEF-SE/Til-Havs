@@ -19,7 +19,6 @@ package no.sintef.fiskinfo.ui.overview
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -34,13 +33,16 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.logEvent
 
 import no.sintef.fiskinfo.R
-import no.sintef.fiskinfo.model.fishingfacility.ToolViewModel
+import no.sintef.fiskinfo.databinding.OverviewFragmentBinding
 import no.sintef.fiskinfo.ui.login.LoginViewModel
-import java.util.*
 
 
 class OverviewFragment : Fragment(), OverviewRecyclerViewAdapter.OnOverviewCardInteractionListener {
     private lateinit var mFirebaseAnalytics: FirebaseAnalytics
+    private var _binding: OverviewFragmentBinding? = null
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
 
     override fun onAction2Clicked(v: View, item: OverviewCardItem?) {
         item?.action2Listener?.onClick(v);
@@ -63,11 +65,11 @@ class OverviewFragment : Fragment(), OverviewRecyclerViewAdapter.OnOverviewCardI
         viewModel = ViewModelProviders.of(this).get(OverviewViewModel::class.java)
         viewModel.refreshFromPreferences(requireContext())
 
-        viewModel?.overviewList.observe(viewLifecycleOwner, Observer {
+        viewModel.overviewList.observe(viewLifecycleOwner, Observer {
             mAdapter?.setOverviewItems(it)
             mSwipeLayout?.isRefreshing = false
         })
-        viewModel?.overviewInfo.observe(viewLifecycleOwner, Observer {
+        viewModel.overviewInfo.observe(viewLifecycleOwner, Observer {
             viewModel.updateOverviewCardItems(requireContext())
             mSwipeLayout?.isRefreshing = false
         })
@@ -77,36 +79,39 @@ class OverviewFragment : Fragment(), OverviewRecyclerViewAdapter.OnOverviewCardI
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
 
-        val view = inflater.inflate(R.layout.overview_fragment, container, false)
-
-        val recyclerView = view.findViewById<RecyclerView>(R.id.overview_recycler_view)
+        _binding = OverviewFragmentBinding.inflate(inflater, container, false)
+        val recyclerView = binding.root.findViewById<RecyclerView>(R.id.overview_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
         mAdapter = OverviewRecyclerViewAdapter(this)
         recyclerView.adapter = mAdapter
 
-        mSwipeLayout = view.findViewById(R.id.overview_fragement_swipe_layout) as SwipeRefreshLayout
+        mSwipeLayout = binding.root.findViewById(R.id.overview_fragement_swipe_layout) as SwipeRefreshLayout
         mSwipeLayout!!.setOnRefreshListener {
             viewModel?.refreshOverviewItems(requireContext())
         }
-        return view
-    }
 
-    private var mAdapter: OverviewRecyclerViewAdapter? = null
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         val navController = findNavController()
 
         loginViewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
                 LoginViewModel.AuthenticationState.AUTHENTICATED -> initViewModel()
                 LoginViewModel.AuthenticationState.UNAUTHENTICATED -> navController.navigate(R.id.login_fragment)
+                else -> {}
             }
         })
+
+        return binding.root
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private var mAdapter: OverviewRecyclerViewAdapter? = null
 
     override fun onResume() {
         super.onResume()

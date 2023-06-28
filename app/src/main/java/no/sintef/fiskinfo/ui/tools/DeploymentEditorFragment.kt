@@ -30,7 +30,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,13 +45,12 @@ import com.google.firebase.analytics.ktx.logEvent
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.databinding.ToolDeploymentEditorFragmentBinding
 import no.sintef.fiskinfo.model.fishingfacility.ToolTypeCode
-import no.sintef.fiskinfo.ui.tools.LocationDmsDialogFragment.LocationDmsDialogListener
+import no.sintef.fiskinfo.util.DMSLocation
 import no.sintef.fiskinfo.util.getToolCountType
 import java.util.*
 
-class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteractionListener,
-    Fragment(),
-    LocationDmsDialogListener {
+class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteractionListener, FragmentResultListener,
+    Fragment() {
     companion object {
         fun newInstance() = DeploymentEditorFragment()
     }
@@ -72,10 +73,10 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext())
 
         setHasOptionsMenu(true)
         _mBinding = DataBindingUtil.inflate(
@@ -109,7 +110,7 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
             builder.setSelection(mViewModel.setupTime.value!!.time)
             val picker: MaterialDatePicker<*> = builder.build()
             picker.addOnPositiveButtonClickListener {
-                var cal = Calendar.getInstance()
+                val cal = Calendar.getInstance()
                 cal.timeInMillis = it as Long
                 mViewModel.setSetupDate(cal.time)
             }
@@ -150,7 +151,7 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
             mBinding.deploymentviewmodel = mViewModel
         })
 
-        mViewModel.locations.observe(viewLifecycleOwner, Observer { locAdapter.locations = it })
+        mViewModel.locations.observe(viewLifecycleOwner) { locAdapter.locations = it }
 
         mViewModel.getFiskInfoProfileDTO()?.observe(viewLifecycleOwner, Observer {
             // Set up observer for fisk info profile so it is ready for when we need it
@@ -169,8 +170,8 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
 
 
             if (mViewModel.canSendReport()) {
-                var result = mViewModel.sendReport();
-                result.observe(this, Observer {
+                val result = mViewModel.sendReport()
+                result.observe(this) {
                     if (it.success) {
                         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
                             param(FirebaseAnalytics.Param.CONTENT_TYPE, "Send tool report, success")
@@ -197,7 +198,7 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
                         )
                             .show()
                     }
-                })
+                }
             } else {
                 mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT) {
                     param(FirebaseAnalytics.Param.CONTENT_TYPE, "Send tool report, invalid profile")
@@ -224,26 +225,21 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
 
     override fun onEditLocationClicked(v: View, itemClicked: Int) {
         mLocationViewModel.initWithLocation(mViewModel.locations.value!![itemClicked], itemClicked)
-        val fm: FragmentManager? = parentFragmentManager
+        val fm: FragmentManager = parentFragmentManager
 
         val locDialogFragment: LocationDmsDialogFragment =
             LocationDmsDialogFragment.newInstance(getString(R.string.tool_edit_location))
-        // SETS the target fragment for use later when sending results
-        locDialogFragment.setTargetFragment(this@DeploymentEditorFragment, 300)
-        locDialogFragment.show(fm!!, "fragment_edit_location")
 
-//        val locDialogFragment: LocationDmsDialogFragment =
-//            LocationDmsDialogFragment.newInstance("Edit location")
-//        editNameDialogFragment.show(fm, "fragment_edit_location")
-
-//        Navigation.findNavController(v).navigate(R.id.action_deployment_editor_fragment_to_location_editor_fragment)
+        fm.setFragmentResultListener(DMSLocation.EDIT_DMS_POSITION_FRAGMENT_RESULT_REQUEST_KEY, viewLifecycleOwner, this)
+        locDialogFragment.show(fm, "fragment_edit_location")
     }
 
-    override fun onDmsEditConfirmed() {
+    override fun onFragmentResult(requestKey: String, result: Bundle) {
         val location = mLocationViewModel.getLocation()
         if (location != null) {
-            mViewModel.locations.value!![mLocationViewModel.listPosition] = location!!
+            mViewModel.locations.value!![mLocationViewModel.listPosition] = location
             mViewModel.locations.postValue(mViewModel.locations.value)
+
         }
     }
 
@@ -251,10 +247,10 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
         private lateinit var mViewModel: DeploymentViewModel
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             mViewModel =
-                ViewModelProviders.of(requireActivity()).get(DeploymentViewModel::class.java)
+                ViewModelProvider(requireActivity())[DeploymentViewModel::class.java]
             // Use the current time as the default values for the picker
             val c = Calendar.getInstance()
-            c.time = mViewModel.setupTime.value
+            c.time = mViewModel.setupTime.value!!
             val hour = c.get(Calendar.HOUR_OF_DAY)
             val minute = c.get(Calendar.MINUTE)
 
@@ -269,10 +265,7 @@ class DeploymentEditorFragment : LocationRecyclerViewAdapter.OnLocationInteracti
         }
 
         override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-            mViewModel.setSetupTime(hourOfDay, minute);
-            // Do something with the time chosen by the user
+            mViewModel.setSetupTime(hourOfDay, minute)
         }
     }
-
-
 }

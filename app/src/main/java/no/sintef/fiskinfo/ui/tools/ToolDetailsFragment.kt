@@ -18,24 +18,18 @@
  */
 package no.sintef.fiskinfo.ui.tools
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.datepicker.MaterialDatePicker
 import no.sintef.fiskinfo.R
 import no.sintef.fiskinfo.databinding.ToolDetailsFragmentBinding
 import no.sintef.fiskinfo.model.fishingfacility.ResponseStatus
 import no.sintef.fiskinfo.model.fishingfacility.ToolTypeCode
 import no.sintef.fiskinfo.util.formatDate
-import java.util.*
 
 
 class ToolDetailsFragment : Fragment() {
@@ -47,37 +41,22 @@ class ToolDetailsFragment : Fragment() {
     }
 
     private lateinit var mViewModel: ToolsViewModel
-    private var _mBinding : ToolDetailsFragmentBinding? = null;
-    private lateinit var mBinding: ToolDetailsFragmentBinding //? = null
+    private var _mBinding : ToolDetailsFragmentBinding? = null
+    private val binding get() = _mBinding!!
 
     private lateinit var mToolCodeAdapter : ToolTypeCodeArrayAdapter
-    private lateinit var mEditTextFilledExposedDropdown: AutoCompleteTextView
     private lateinit var mLocationAdapter : CompactLocationRecyclerViewAdapter
 
-    //private lateinit val mBinding: ToolDetailsFragmentBinding = null
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.tool_details_fragment, container, false)
+    ): View {
+        _mBinding = ToolDetailsFragmentBinding.inflate(inflater, container, false)
 
         mToolCodeAdapter = ToolTypeCodeArrayAdapter(requireContext(), R.layout.exposed_dropdown_menu_item, ToolTypeCode.values())
-        //mEditTextFilledExposedDropdown = mBinding.toolDetailsTypeField
 
-        //mEditTextFilledExposedDropdown.setOnItemClickListener { parent, view, position, id -> mViewModel.setSelectedToolCode(parent.getItemAtPosition(position) as ToolTypeCode) }
-        //mEditTextFilledExposedDropdown.setAdapter(mToolCodeAdapter)
-
-        /*mBinding.toolDetailsDateLayout.setStartIconOnClickListener  {
-            val builder : MaterialDatePicker.Builder<*> = MaterialDatePicker.Builder.datePicker()
-            //val currentTimeInMillis = Calendar.getInstance().timeInMillis
-            //builder.setSelection(currentTimeInMillis)
-            val picker : MaterialDatePicker<*> = builder.build()
-            picker.addOnPositiveButtonClickListener { mViewModel.setSelectedToolDate(it as Date) }
-            picker.show(requireFragmentManager(), picker.toString())
-        }*/
-
-        mBinding.toolPositionRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.toolPositionRecyclerView.layoutManager = LinearLayoutManager(context)
 
 //        mViewModel = ViewModelProviders.of(requireActivity()).get(ToolsViewModel::class.java)
 //        val locations = mViewModel?.getSelectedTool().value?.getLocations()
@@ -90,27 +69,22 @@ class ToolDetailsFragment : Fragment() {
 //        if (locations != null)
 //            locAdapter.locations = locations
 
-        mBinding.toolPositionRecyclerView.adapter = mLocationAdapter
+        binding.toolPositionRecyclerView.adapter = mLocationAdapter
 
-        return mBinding!!.root
-    }
+        mViewModel = ViewModelProvider(requireActivity()).get(ToolsViewModel::class.java)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mViewModel = ViewModelProviders.of(requireActivity()).get(ToolsViewModel::class.java)
-
-        mViewModel.getSelectedTool().observe(viewLifecycleOwner, Observer { tool ->
+        mViewModel.getSelectedTool().observe(viewLifecycleOwner) { tool ->
             if (tool != null) {
 
-                mBinding.tool = tool
-                mBinding.toolviewmodel = mViewModel
+                binding.tool = tool
+                binding.toolviewmodel = mViewModel
                 mLocationAdapter.locations = tool.getLocations()
 
                 // Testing tool.responseReason = "This is a test on a response reason string that is quite long, just to test"
                 // Testing tool.responseDateTime = Date()
 
 
-                var responseStr = when(tool.responseStatus) {
+                var responseStr = when (tool.responseStatus) {
                     ResponseStatus.RESPONSE_APPROVED -> getString(R.string.tool_response_approved)
                     ResponseStatus.RESPONSE_REJECTED -> getString(R.string.tool_response_rejected)
                     ResponseStatus.NO_RESPONSE -> getString(R.string.tool_response_no_response)
@@ -126,19 +100,21 @@ class ToolDetailsFragment : Fragment() {
                     responseStr += "\n" + tool.responseReason
                 }
 
-                if (tool.errorReportedFromApi == true)  {
+                if (tool.errorReportedFromApi == true) {
                     responseStr += "\n" + getString(R.string.tool_report_api_error)
                 }
 
-                mBinding.toolResponseField.setText(responseStr)
+                binding.toolResponseField.setText(responseStr)
             }
-        })
+        }
 
-        mViewModel.selectedToolCodeName.observe(viewLifecycleOwner, Observer { toolCodeName ->
+        mViewModel.selectedToolCodeName.observe(viewLifecycleOwner) { toolCodeName ->
             if (toolCodeName != null) {
-                mBinding.toolcodename = toolCodeName
+                binding.toolcodename = toolCodeName
             }
-        })
+        }
+
+        return binding.root
     }
 
     override fun onDestroyView() {

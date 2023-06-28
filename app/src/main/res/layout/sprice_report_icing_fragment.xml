@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="no.sintef.fiskinfo.util.UtilsKt" />
+
+        <import type="android.text.InputType" />
+
+        <variable
+            name="viewmodel"
+            type="no.sintef.fiskinfo.ui.sprice.ReportIcingViewModel" />
+    </data>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:fillViewport="true"
+        tools:context=".ui.map.MapFragment">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/report_icing_category_header_observation_time" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/icingDetailsDateLayout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/icing_report_date"
+                        app:startIconContentDescription="@string/proto_close_drawer"
+                        app:startIconDrawable="@drawable/ic_date">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/icingReportDateField"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:inputType="@{InputType.TYPE_NULL}"
+                            android:text="@{UtilsKt.formatDate(viewmodel.synopDate)}" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin_small"
+                        app:errorEnabled="true"
+                        app:startIconContentDescription="@string/proto_close_drawer"
+                        app:startIconDrawable="@drawable/ic_time">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/icingReportTimeField"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:hint="@string/sprice_icing_reporting_synop"
+                            android:maxLength="7"
+                            android:text="@{viewmodel.synopHourSelect.toString()}" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/report_icing_category_header_sea_icing" />
+
+                <GridView
+                    android:id="@+id/reportIcingSeaIcingGridView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_small"
+                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"
+                    android:numColumns="1"
+                    android:verticalSpacing="@dimen/activity_vertical_margin_small"></GridView>
+
+                <TextView
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/report_icing_category_header_vessel_icing" />
+
+                <GridView
+                    android:id="@+id/reportIcingVesselIcingGridView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_small"
+                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"
+                    android:numColumns="2"
+                    android:verticalSpacing="@dimen/activity_vertical_margin_small"></GridView>
+
+                <GridView
+                    android:id="@+id/reportIcingVesselIcingGridViewSecondRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_small"
+                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"
+                    android:numColumns="2"
+                    android:verticalSpacing="@dimen/activity_vertical_margin_small"></GridView>
+
+                <!--                <androidx.recyclerview.widget.RecyclerView-->
+                <!--                    android:id="@+id/reportIcingVesselIcingRecyclerView"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"-->
+                <!--                    android:verticalSpacing="@dimen/activity_vertical_margin_small"-->
+                <!--                    android:layout_marginTop="@dimen/activity_vertical_margin_small"-->
+                <!--                    >-->
+                <!--                </androidx.recyclerview.widget.RecyclerView>-->
+
+                <!--                <TextView-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:text="@string/report_icing_category_header_wind_observations"-->
+                <!--                    style="?android:attr/listSeparatorTextViewStyle"-->
+                <!--                    />-->
+
+                <GridView
+                    android:id="@+id/reportIcingWindObservationsGridView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_small"
+                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"
+                    android:numColumns="1"
+                    android:verticalSpacing="@dimen/activity_vertical_margin_small"></GridView>
+
+                <TextView
+                    style="?android:attr/listSeparatorTextViewStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/report_icing_category_header_position" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/relativeLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintHeight_default="wrap"
+                        android:layout_margin="8dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/icingObservationPositionRecyclerView"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/relativeLayout"
+                            app:layout_constraintHeight_max="150dp"
+                            tools:listitem="@layout/location_list_item" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/icingObservationAddImagesLayout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:startIconContentDescription="@string/proto_close_drawer"
+                    app:startIconDrawable="@drawable/ic_image">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/icingObservationAddImagesField"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:inputType="@{InputType.TYPE_NULL}"
+                        android:text="@string/report_icing_select_images_title" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <GridView
+                    android:id="@+id/image_grid_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin_small"
+                    android:horizontalSpacing="@dimen/activity_horizontal_margin_small"
+                    android:verticalSpacing="@dimen/activity_vertical_margin_small"
+                    android:numColumns="4"
+                    android:visibility="visible"
+                    />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

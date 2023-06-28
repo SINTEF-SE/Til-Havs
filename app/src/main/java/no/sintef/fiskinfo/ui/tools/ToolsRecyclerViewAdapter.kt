@@ -18,28 +18,23 @@
  */
 package no.sintef.fiskinfo.ui.tools
 
-import android.content.res.Resources
 import android.graphics.Typeface
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import no.sintef.fiskinfo.R
-import no.sintef.fiskinfo.model.fishingfacility.FishingFacility
 import no.sintef.fiskinfo.model.fishingfacility.ResponseStatus
 import no.sintef.fiskinfo.model.fishingfacility.ToolTypeCode
 import no.sintef.fiskinfo.model.fishingfacility.ToolViewModel
 import no.sintef.fiskinfo.util.formatLocation
 import no.sintef.fiskinfo.util.isToolOld
-
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 
 // TODO: Add attribution
@@ -77,12 +72,12 @@ class ToolsRecyclerViewAdapter(private val mListener: OnToolInteractionListener?
 
         if (mConfirmed) {
             val bkCol = if (isToolOld(tool, context)) R.color.colorBarentsOrange else R.color.colorBarentsLightBlue
-            holder.removeButton.setBackgroundColor(context.resources.getColor(bkCol))
+            holder.removeButton.setBackgroundColor(ContextCompat.getColor(context, bkCol))
         }
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         sdf.timeZone = TimeZone.getDefault()
-        val title = if(tool.lastChangedDateTime != null) sdf.format(tool.lastChangedDateTime) else tool.responseStatus.toString() // TODO: Check if this should be setupDateTime and check for null
+        val title = if(tool.lastChangedDateTime != null) tool.lastChangedDateTime?.let { sdf.format(it) } else tool.responseStatus.toString() // TODO: Check if this should be setupDateTime and check for null
         holder.titleView.text = title
 
         val textStyle =  Typeface.BOLD//if (holder.mItem!!.seen) Typeface.NORMAL else Typeface.BOLD
@@ -94,6 +89,7 @@ class ToolsRecyclerViewAdapter(private val mListener: OnToolInteractionListener?
             ToolTypeCode.DANPURSEINE -> holder.iconView.setBackgroundResource(R.drawable.ic_purseseine)
             ToolTypeCode.LONGLINE -> holder.iconView.setBackgroundResource(R.drawable.ic_hook)
             ToolTypeCode.NETS -> holder.iconView.setBackgroundResource(R.drawable.ic_net)
+            else -> { holder.iconView.setBackgroundResource(R.drawable.ic_help) }
         }
 
         holder.detail1View.text = tool.toolTypeCode?.getLocalizedName(context)

@@ -2,8 +2,6 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
 
-apply plugin: 'kotlin-android-extensions'
-
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
@@ -17,13 +15,13 @@ android {
             storePassword prod_store_password
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 32
     defaultConfig {
         applicationId "fiskinfoo.no.sintef.fiskinfoo"
         minSdkVersion 21
-        targetSdkVersion 31
-        versionCode 47
-        versionName "3.0.1.3"
+        targetSdkVersion 32
+        versionCode 49
+        versionName "3.0.1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 appAuthRedirectScheme: "no.sintef.fiskinfo.android"
@@ -31,6 +29,7 @@ android {
         signingConfig signingConfigs.signing_config
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -59,6 +58,13 @@ android {
             buildConfigField("String", "FISKINFO_BW_CLIENT_SECRET", prod_fiskinfo_bwclientsecret)
             buildConfigField("String", "FISKINFO_BW_CLIENT_REDIRECT_URL", prod_fiskinfo_bwclient_redirect_url)
             buildConfigField("String", "FISKINFO_BW_CLIENT_SCOPE", prod_fiskinfo_bwclient_scope)
+
+            buildConfigField("String", "SPRICE_ORAP_SERVER_URL", "\"https://orap.met.no/\"")
+            buildConfigField("String", "SPRICE_ORAP_SFTP_URL", "\"fog.met.no\"")
+            buildConfigField("int", "SPRICE_ORAP_SFTP_PORT_NUMBER", prod_sprice_sftp_port_number)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_USER_NAME", prod_sprice_sftp_user_name)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_PASSWORD", prod_sprice_sftp_password)
+
             signingConfig signingConfigs.signing_config
         }
         DebugabbleRelease {
@@ -75,6 +81,13 @@ android {
             buildConfigField("String", "FISKINFO_BW_CLIENT_SECRET", prod_fiskinfo_bwclientsecret)
             buildConfigField("String", "FISKINFO_BW_CLIENT_REDIRECT_URL", prod_fiskinfo_bwclient_redirect_url)
             buildConfigField("String", "FISKINFO_BW_CLIENT_SCOPE", prod_fiskinfo_bwclient_scope)
+
+            buildConfigField("String", "SPRICE_ORAP_SERVER_URL", "\"https://orap.met.no/\"")
+            buildConfigField("String", "SPRICE_ORAP_SFTP_URL", "\"fog.met.no\"")
+            buildConfigField("int", "SPRICE_ORAP_SFTP_PORT_NUMBER", prod_sprice_sftp_port_number)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_USER_NAME", prod_sprice_sftp_user_name)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_PASSWORD", prod_sprice_sftp_password)
+
             signingConfig signingConfigs.signing_config
         }
         debug {
@@ -89,6 +102,13 @@ android {
             buildConfigField("String", "FISKINFO_BW_CLIENT_SECRET", pilot_fiskinfo_bwclientsecret)
             buildConfigField("String", "FISKINFO_BW_CLIENT_REDIRECT_URL", pilot_fiskinfo_bwclient_redirect_url)
             buildConfigField("String", "FISKINFO_BW_CLIENT_SCOPE", pilot_fiskinfo_bwclient_scope)
+
+            buildConfigField("String", "SPRICE_ORAP_SERVER_URL", "\"https://orap.met.no/\"")
+            buildConfigField("String", "SPRICE_ORAP_SFTP_URL", "\"fog.met.no\"")
+            buildConfigField("int", "SPRICE_ORAP_SFTP_PORT_NUMBER", prod_sprice_sftp_port_number)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_USER_NAME", prod_sprice_sftp_user_name)
+            buildConfigField("String", "SPRICE_ORAP_SFTP_PASSWORD", prod_sprice_sftp_password)
+
         }
     }
 }
@@ -96,29 +116,31 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation platform('com.google.firebase:firebase-bom:26.1.0')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.core:core-ktx:1.3.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.10"
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.jcraft:jsch:0.1.55'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.1"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.1"
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:2.5.1"
+    implementation "androidx.navigation:navigation-ui-ktx:2.5.1"
 
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
     implementation 'net.openid:appauth:0.11.1'
     implementation 'net.sourceforge.streamsupport:android-retrofuture:1.7.2'
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
 //    implementation 'android.arch.navigation:navigation-fragment:1.0.0'
 //    implementation 'android.arch.navigation:navigation-ui:1.0.0'
